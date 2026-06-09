@@ -404,25 +404,22 @@ except Exception as e:
     import sys
     print(f"[WARN] DB init error (non-fatal): {e}", file=sys.stderr)
 
-# Reliable production detection: Railway always sets PORT ≠ 5001
-_PORT = int(os.environ.get('PORT', '0'))
-IS_PRODUCTION = _PORT != 0 and _PORT != 5001
+# Health check endpoint (bypasses templates/DB for Railway)
+@app.route('/health')
+def health():
+    return 'OK', 200, {'Content-Type': 'text/plain'}
+
 
 if __name__ == '__main__':
-    port = _PORT if _PORT else 5001
+    port = int(os.environ.get('PORT', 5001))
 
     print('=' * 50)
     print('Pokemon Card Manager starting...')
-    print(f'Mode:     {"PRODUCTION" if IS_PRODUCTION else "DEVELOPMENT"}')
     print(f'Port:     {port}')
     print(f'Database: {config.DATABASE_PATH}')
     print(f'Images:   {config.UPLOAD_FOLDER}')
+    print(f'Debug:    OFF (production)')
     print('=' * 50)
 
-    if IS_PRODUCTION:
-        # Production: waitress (robust WSGI server, no reloader)
-        from waitress import serve
-        serve(app, host='0.0.0.0', port=port)
-    else:
-        # Development: Flask built-in server with debug reloader
-        app.run(host='0.0.0.0', port=port, debug=True)
+    # Hardcoded: NEVER use debug=True on Railway — reloader causes 502
+    app.run(host='0.0.0.0', port=port, debug=False)
