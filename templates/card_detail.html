@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卡牌详情 &mdash; 宝可梦卡牌管理器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=3">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ===== Navigation ===== -->
+    <nav class="nav-bar">
+      <a href="/" class="nav-brand">
+        <div class="brand-icon"></div>
+        <div>
+          <h1>POKÉ CARD</h1>
+          <span>卡牌详情</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="/"          class="nav-link" data-page="/">我的卡牌</a>
+        <a href="/dashboard"  class="nav-link" data-page="/dashboard">资产看板</a>
+        <a href="/price"      class="nav-link" data-page="/price">价格行情</a>
+      </div>
+    </nav>
+
+    <!-- ===== Back Button ===== -->
+    <div style="margin-bottom:24px;">
+      <button class="btn btn-outline btn-sm" onclick="history.back()">← 返回我的卡牌</button>
+    </div>
+
+    <!-- ===== Detail Grid ===== -->
+    <div class="detail-grid">
+      <div class="detail-image-section" id="imageSection">
+        <img src="" alt="" class="detail-main-image" id="detailImage">
+      </div>
+
+      <div>
+        <h2 id="detailName" style="font-size:clamp(18px,2.5vw,26px);font-weight:900;letter-spacing:-.02em;margin-bottom:6px;color:var(--text-primary);"></h2>
+        <p  id="detailNameEn" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:20px;letter-spacing:.03em;"></p>
+
+        <dl class="detail-fields" id="detailFields"></dl>
+
+        <!-- ===== Value Info ===== -->
+        <div id="detailValueInfo" style="display:none;margin-top:20px;padding:18px 22px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);">
+          <div style="display:flex;gap:32px;">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">当前估价</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--green-400);letter-spacing:-.02em;" id="detailEstPrice"></div>
+            </div>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">总估值 &times; 数量</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--gold-400);letter-spacing:-.02em;" id="detailTotalEst"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-actions" id="detailActions">
+          <button class="btn btn-primary btn-sm" onclick="openEditModal()">编辑</button>
+          <a href="/price" class="btn btn-outline btn-sm" onclick="sessionStorage.setItem('selectedCardId','')">查看价格行情</a>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal()">删除</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.app-container -->
+
+  <!-- ===== Edit Modal ===== -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>编辑卡牌</h2>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="editForm" onsubmit="saveEditCard(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>卡牌图片</label>
+            <div class="image-upload-area" id="editImageArea" onclick="document.getElementById('editImageInput').click()">
+              <img id="editImagePreview" src="" style="display:none;">
+              <p class="upload-hint" id="editUploadHint">点击更换图片</p>
+              <input type="file" id="editImageInput" accept="image/*" style="display:none;" onchange="previewEditImage(event)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>卡牌名称 *</label><input type="text" name="name" required></div>
+            <div class="form-group"><label>英文名</label><input type="text" name="name_en"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>系列</label><input type="text" name="set_name"></div>
+            <div class="form-group"><label>编号</label><input type="text" name="card_number"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>稀有度</label>
+              <select name="rarity">
+                <option value="C">C &mdash; Common</option>
+                <option value="U">U &mdash; Uncommon</option>
+                <option value="R">R &mdash; Rare</option>
+                <option value="RR">RR &mdash; Double Rare</option>
+                <option value="SR">SR &mdash; Special Rare</option>
+                <option value="SAR">SAR &mdash; Special Art Rare</option>
+                <option value="UR">UR &mdash; Ultra Rare</option>
+                <option value="CSR">CSR &mdash; Character Super Rare</option>
+                <option value="HR">HR &mdash; Hyper Rare</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>品相</label>
+              <select name="condition">
+                <option value="NM">NM &mdash; 近全新</option>
+                <option value="LP">LP &mdash; 轻微使用痕迹</option>
+                <option value="MP">MP &mdash; 中度磨损</option>
+                <option value="HP">HP &mdash; 重度磨损</option>
+                <option value="Damaged">Damaged &mdash; 损坏</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>持有数量</label><input type="number" name="quantity" min="1" step="1"></div>
+            <div class="form-group"><label>收购单价（元）</label><input type="number" name="cost_price" min="0" step="1"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>当下市场价（元）</label><input type="number" name="market_price" min="0" step="1"></div>
+            <div class="form-group"><label>备注</label><input type="text" name="notes" style="width:100%;"></div>
+          </div>
+          <input type="hidden" name="id" id="editCardId">
+        </div><!-- /.modal-body -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeEditModal()">取消</button>
+          <button type="submit" class="btn btn-primary">保存修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== Delete Confirm ===== -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <h2>确认删除</h2>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">此操作不可恢复，确定要删除这张卡吗？</p>
+        <p style="font-weight:700;font-size:15px;color:var(--text-primary);" id="deleteCardName"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">取消</button>
+        <button class="btn btn-danger" onclick="confirmDeleteDetail()">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/app.js?v=3"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof loadDetailPage === 'function') loadDetailPage();
+    });
+  </script>
+</body>
+</html>
