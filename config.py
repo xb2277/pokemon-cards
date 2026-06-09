@@ -22,4 +22,4 @@ SCRAPER_TIMEOUT = 15  # seconds
 
 # App config
 SECRET_KEY = 'pokemon-cards-manager-dev-2026'
-DEBUG = True
+DEBUG = False  # Production-safe default; local dev can override
