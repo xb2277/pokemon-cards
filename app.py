@@ -396,24 +396,26 @@ def serve_images(filename):
 
 # ============ Init & Run ============
 
-# Always initialize DB when module loads (works for both dev server and gunicorn)
+# Always initialize DB when module loads
 init_db()
 ensure_market_price_column()
-# Disable debug mode in production (Railway)
-is_production = os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('PRODUCTION')
-if is_production:
-    app.config['DEBUG'] = False
+
+# Detect production (Railway sets PORT env var)
+is_production = bool(os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('PRODUCTION'))
 
 
 if __name__ == '__main__':
-    # Local dev only
     port = int(os.environ.get('PORT', 5001))
     host = os.environ.get('HOST', '127.0.0.1')
 
+    # Production: no debug, no reloader — critical for Railway
+    use_debug = not is_production
+
     print('=' * 50)
     print('Pokemon Card Manager starting...')
+    print(f'Mode:     {"PRODUCTION" if is_production else "DEVELOPMENT"}')
     print(f'Database: {config.DATABASE_PATH}')
     print(f'Images:   {config.UPLOAD_FOLDER}')
     print(f'Open: http://{host}:{port}')
     print('=' * 50)
-    app.run(host='0.0.0.0', port=port, debug=config.DEBUG)
+    app.run(host='0.0.0.0', port=port, debug=use_debug)
