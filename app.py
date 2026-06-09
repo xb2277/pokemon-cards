@@ -419,5 +419,10 @@ if __name__ == '__main__':
     print(f'Images:   {config.UPLOAD_FOLDER}')
     print('=' * 50)
 
-    # NEVER use debug=True in production — reloader breaks on Railway
-    app.run(host='0.0.0.0', port=port, debug=not IS_PRODUCTION)
+    if IS_PRODUCTION:
+        # Production: waitress (robust WSGI server, no reloader)
+        from waitress import serve
+        serve(app, host='0.0.0.0', port=port)
+    else:
+        # Development: Flask built-in server with debug reloader
+        app.run(host='0.0.0.0', port=port, debug=True)
