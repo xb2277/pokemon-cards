@@ -1,0 +1,12 @@
+[build]
+  builder = "nixpacks"
+  buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+  startCommand = "python app.py"
+  healthcheckPath = "/"
+  healthcheckTimeout = 30
+  restartPolicyMaxRetries = 3
+
+[service]
+  port = "${PORT}"

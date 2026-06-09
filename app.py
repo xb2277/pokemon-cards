@@ -397,25 +397,27 @@ def serve_images(filename):
 # ============ Init & Run ============
 
 # Always initialize DB when module loads
-init_db()
-ensure_market_price_column()
+try:
+    init_db()
+    ensure_market_price_column()
+except Exception as e:
+    import sys
+    print(f"[WARN] DB init error (non-fatal): {e}", file=sys.stderr)
 
-# Detect production (Railway sets PORT env var)
-is_production = bool(os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('PRODUCTION'))
-
+# Reliable production detection: Railway always sets PORT ≠ 5001
+_PORT = int(os.environ.get('PORT', '0'))
+IS_PRODUCTION = _PORT != 0 and _PORT != 5001
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
-    host = os.environ.get('HOST', '127.0.0.1')
-
-    # Production: no debug, no reloader — critical for Railway
-    use_debug = not is_production
+    port = _PORT if _PORT else 5001
 
     print('=' * 50)
     print('Pokemon Card Manager starting...')
-    print(f'Mode:     {"PRODUCTION" if is_production else "DEVELOPMENT"}')
+    print(f'Mode:     {"PRODUCTION" if IS_PRODUCTION else "DEVELOPMENT"}')
+    print(f'Port:     {port}')
     print(f'Database: {config.DATABASE_PATH}')
     print(f'Images:   {config.UPLOAD_FOLDER}')
-    print(f'Open: http://{host}:{port}')
     print('=' * 50)
-    app.run(host='0.0.0.0', port=port, debug=use_debug)
+
+    # NEVER use debug=True in production — reloader breaks on Railway
+    app.run(host='0.0.0.0', port=port, debug=not IS_PRODUCTION)
