@@ -1,0 +1,9 @@
+# Nixpacks configuration — forces Railway to respect our start command
+[phases.setup]
+nixPkgs = ["python312"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "python app.py"

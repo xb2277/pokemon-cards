@@ -404,6 +404,9 @@ except Exception as e:
     import sys
     print(f"[WARN] DB init error (non-fatal): {e}", file=sys.stderr)
 
+# Ensure upload/images directory exists
+os.makedirs(config.UPLOAD_FOLDER, exist_ok=True)
+
 # Health check endpoint (bypasses templates/DB for Railway)
 @app.route('/health')
 def health():
@@ -412,14 +415,22 @@ def health():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
+    is_production = port != 5001
 
     print('=' * 50)
     print('Pokemon Card Manager starting...')
+    print(f'Mode:     {"PRODUCTION" if is_production else "DEVELOPMENT"}')
+    print(f'Server:   {"waitress" if is_production else "Flask dev"}')
     print(f'Port:     {port}')
     print(f'Database: {config.DATABASE_PATH}')
     print(f'Images:   {config.UPLOAD_FOLDER}')
-    print(f'Debug:    OFF (production)')
     print('=' * 50)
 
-    # Hardcoded: NEVER use debug=True on Railway — reloader causes 502
-    app.run(host='0.0.0.0', port=port, debug=False)
+    if is_production:
+        # Production: waitress — pure Python, robust, no forking issues
+        from waitress import serve
+        print(f'[waitress] Serving on 0.0.0.0:{port}')
+        serve(app, host='0.0.0.0', port=port, threads=4)
+    else:
+        # Development: Flask built-in with debug reloader
+        app.run(host='0.0.0.0', port=port, debug=True)
