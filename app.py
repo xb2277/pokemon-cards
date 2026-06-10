@@ -1,4 +1,4 @@
-"""Minimal test app — verifies Railway can serve pages."""
+"""Minimal test app - fully self-contained for Railway deployment."""
 import os
 import sys
 from flask import Flask
@@ -12,7 +12,7 @@ def home():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 Railway 测试成功！</title>
+    <title>Railway 测试成功!</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -33,9 +33,9 @@ def home():
     </style>
 </head>
 <body>
-    <h1>🎉 测试成功！</h1>
-    <p>Railway + Flask + Gunicorn 正常工作</p>
-    <p>Pokemon Card Manager 即将上线</p>
+    <h1>Test successful!</h1>
+    <p>Railway + Flask is working</p>
+    <p>Pokemon Card Manager coming soon</p>
     <div class="badge">PORT: {port} | Python: {python}</div>
 </body>
 </html>'''.format(
@@ -47,6 +47,7 @@ def home():
 def health():
     return 'OK', 200, {'Content-Type': 'text/plain'}
 
-# Print startup info
-print(f'✓ Minimal test app loaded (Python {sys.version.split()[0]})', flush=True)
-print(f'✓ PORT env: {os.environ.get("PORT", "NOT SET")}', flush=True)
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5001))
+    print(f'Starting Flask on 0.0.0.0:{port}', flush=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
