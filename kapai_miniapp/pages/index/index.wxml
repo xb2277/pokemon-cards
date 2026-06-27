@@ -1,0 +1,117 @@
+<!-- 首页 -->
+<view class="page-container">
+
+  <!-- ====== Home Hero — User Area ====== -->
+  <view class="home-hero">
+    <view class="home-hero-avatar" bindtap="showLoginSheet">
+      <image wx:if="{{userInfo.avatar}}" src="{{userInfo.avatar}}" mode="aspectFill"/>
+      <view wx:else class="avatar-placeholder">🃏</view>
+    </view>
+    <view class="home-hero-info">
+      <view class="greeting">{{userInfo.nickName || '你好，卡牌大师！'}}</view>
+      <view class="sub">探索你的宝可梦卡牌收藏</view>
+    </view>
+    <view class="home-hero-login">
+      <button wx:if="{{!userInfo}}" class="login-btn" bindtap="showLoginSheet">登录</button>
+      <text wx:else class="logout-text" bindtap="showLoginSheet">编辑资料</text>
+    </view>
+  </view>
+
+  <!-- ====== Stats Strip ====== -->
+  <view class="stats-strip">
+    <view class="stat-item">
+      <view class="num">{{stats.total}}</view>
+      <view class="lbl">我的卡牌种类</view>
+    </view>
+    <view class="stat-item">
+      <view class="num num-gold">{{stats.qty}}</view>
+      <view class="lbl">收藏总张数</view>
+    </view>
+    <view class="stat-item">
+      <view class="num">{{stats.cost}}</view>
+      <view class="lbl">购卡总成本</view>
+    </view>
+    <view class="stat-item">
+      <view class="num num-red">{{stats.value}}</view>
+      <view class="lbl">当下持有总价</view>
+    </view>
+  </view>
+
+  <!-- ====== Navigation Cards ====== -->
+  <view class="nav-cards">
+    <view class="nav-card" bindtap="goCollection">
+      <view class="nc-icon">🃏</view>
+      <view class="nc-body">
+        <view class="nc-title">我的收藏</view>
+        <view class="nc-desc">查看和管理你收藏的每一张卡牌</view>
+      </view>
+      <text class="nc-arrow">›</text>
+    </view>
+    <view class="nav-card" bindtap="goCatalog">
+      <view class="nc-icon">📖</view>
+      <view class="nc-body">
+        <view class="nc-title">卡牌图鉴</view>
+        <view class="nc-desc">浏览全部宝可梦卡牌数据库</view>
+      </view>
+      <text class="nc-arrow">›</text>
+    </view>
+    <view class="nav-card" bindtap="goDashboard">
+      <view class="nc-icon">📊</view>
+      <view class="nc-body">
+        <view class="nc-title">资产看板</view>
+        <view class="nc-desc">收藏价值分析 · 盈亏趋势 · 排行榜</view>
+      </view>
+      <text class="nc-arrow">›</text>
+    </view>
+    <view class="nav-card" bindtap="goPrice">
+      <view class="nc-icon">📈</view>
+      <view class="nc-body">
+        <view class="nc-title">价格行情</view>
+        <view class="nc-desc">实时追踪卡牌市场价格变动</view>
+      </view>
+      <text class="nc-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- Version -->
+  <view style="text-align:center;padding:48rpx;color:var(--text3);font-size:22rpx;">
+    v1.0.0 · 宝可梦卡牌收藏册
+  </view>
+
+</view>
+
+<!-- ====== Login Sheet ====== -->
+<view class="modal-mask" wx:if="{{loginSheetVisible}}" bindtap="hideLoginSheet">
+  <view class="modal-sheet" catchtap="noop">
+    <view class="ms-header">
+      <text class="title">登录</text>
+      <view class="close" bindtap="hideLoginSheet">✕</view>
+    </view>
+    <view class="ms-body" style="text-align:center;">
+      <view style="margin-bottom:28rpx;">
+        <button class="login-avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image wx:if="{{loginForm.avatar}}" src="{{loginForm.avatar}}" mode="aspectFill" class="login-avatar-preview"/>
+          <view wx:else class="login-avatar-empty">
+            <text style="font-size:56rpx;">📷</text>
+            <text style="font-size:22rpx;color:var(--text3);margin-top:8rpx;">点击选择头像</text>
+          </view>
+        </button>
+      </view>
+      <view class="form-field">
+        <view class="label">昵称</view>
+        <input type="nickname" placeholder="点击获取微信昵称" value="{{loginForm.nickName}}" bindinput="onNicknameInput" bindblur="onNicknameBlur"/>
+      </view>
+      <view class="form-field">
+        <view class="label">手机号</view>
+        <button class="btn btn-outline btn-block" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber" style="height:80rpx;font-size:26rpx;">
+          {{loginForm.phone || '点击获取手机号'}}
+        </button>
+      </view>
+    </view>
+    <view class="ms-footer">
+      <button wx:if="{{userInfo}}" class="btn btn-danger" style="margin-right:auto;" bindtap="doLogout">退出登录</button>
+      <button class="btn btn-outline" style="flex:1;" bindtap="hideLoginSheet">取消</button>
+      <button class="btn btn-primary" style="flex:1;" bindtap="doLogin" loading="{{loginLoading}}" disabled="{{loginLoading}}">保存</button>
+    </view>
+  </view>
+</view>

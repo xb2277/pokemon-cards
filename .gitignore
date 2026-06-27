@@ -12,8 +12,21 @@ ENV/
 instance/
 .webassets-cache
 
-# Database
+# Database (contains user data - never commit)
+*.db
 *.db-journal
+*.db-wal
+*.db-shm
+
+# Runtime data
+logs/
+images/
+
+# WorkBuddy workspace
+.workbuddy/
+
+# WeChat mini program private config
+kapai_miniapp/project.private.config.json
 
 # IDEs
 .vscode/

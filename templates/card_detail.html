@@ -2,12 +2,12 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>卡牌详情 &mdash; 宝可梦卡牌管理器</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=3">
+  <link rel="stylesheet" href="/static/style.css?v=5">
 </head>
 <body>
 
@@ -41,23 +41,45 @@
       </div>
 
       <div>
-        <h2 id="detailName" style="font-size:clamp(18px,2.5vw,26px);font-weight:900;letter-spacing:-.02em;margin-bottom:6px;color:var(--text-primary);"></h2>
-        <p  id="detailNameEn" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:20px;letter-spacing:.03em;"></p>
+        <h2 id="detailName" style="font-size:clamp(18px,2.5vw,26px);font-weight:900;letter-spacing:-.02em;margin-bottom:4px;color:var(--text-primary);"></h2>
+        <p  id="detailNameEn" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:18px;letter-spacing:.03em;"></p>
 
-        <dl class="detail-fields" id="detailFields"></dl>
+        <!-- ===== 分组数据卡片 ===== -->
+        <div id="detailFields" class="detail-card-group">
 
-        <!-- ===== Value Info ===== -->
-        <div id="detailValueInfo" style="display:none;margin-top:20px;padding:18px 22px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);">
-          <div style="display:flex;gap:32px;">
-            <div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">当前估价</div>
-              <div style="font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--green-400);letter-spacing:-.02em;" id="detailEstPrice"></div>
+          <!-- 基本信息卡 -->
+          <div class="detail-card">
+            <div class="detail-card-title">
+              <span class="detail-card-icon icon-pokeball"></span>
+              基本信息
             </div>
-            <div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">总估值 &times; 数量</div>
-              <div style="font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--gold-400);letter-spacing:-.02em;" id="detailTotalEst"></div>
+            <div class="detail-card-body" id="detailBasicInfo">
+              <!-- JS 填充 -->
             </div>
           </div>
+
+          <!-- 持有信息卡 -->
+          <div class="detail-card">
+            <div class="detail-card-title">
+              <span class="detail-card-icon icon-folder"></span>
+              持有信息
+            </div>
+            <div class="detail-card-body" id="detailHoldInfo">
+              <!-- JS 填充 -->
+            </div>
+          </div>
+
+          <!-- 价格信息卡 -->
+          <div class="detail-card detail-card-price">
+            <div class="detail-card-title">
+              <span class="detail-card-icon icon-price"></span>
+              价格信息
+            </div>
+            <div class="detail-card-body" id="detailPriceInfo">
+              <!-- JS 填充 -->
+            </div>
+          </div>
+
         </div>
 
         <div class="detail-actions" id="detailActions">
@@ -159,7 +181,7 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="/static/app.js?v=3"></script>
+  <script src="/static/app.js?v=9"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof loadDetailPage === 'function') loadDetailPage();

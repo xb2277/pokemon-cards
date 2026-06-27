@@ -1365,32 +1365,174 @@ h1, h2, h3, h4 {
    ============================================================ */
 .detail-grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 32px;
+  grid-template-columns: 300px 1fr;
+  gap: 36px;
+  align-items: start;
 }
 
-.detail-image-section { text-align: center; }
+.detail-image-section {
+  text-align: center;
+  position: sticky;
+  top: 24px;
+}
 
 .detail-main-image {
   width: 100%;
-  max-width: 320px;
+  max-width: 300px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transition: transform .2s;
+}
+.detail-main-image:hover {
+  transform: scale(1.03);
 }
 
-.detail-fields dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 10px 20px;
-  font-size: 14px;
+/* ---- 分组卡片 ---- */
+.detail-card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
-.detail-fields dt { color: var(--text-muted); font-weight: 500; }
-.detail-fields dd { color: var(--text-primary); font-weight: 600; }
+
+.detail-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s;
+}
+.detail-card:hover { box-shadow: var(--shadow-md); }
+
+.detail-card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-card-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+.detail-card-icon.icon-pokeball {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 2a10 10 0 000 20z' fill='%239ca3af' opacity='.2'/%3E%3Cline x1='12' y1='2' x2='12' y2='22'/%3E%3Cline x1='2' y1='12' x2='22' y2='12'/%3E%3C/svg%3E");
+}
+.detail-card-icon.icon-folder {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z'/%3E%3C/svg%3E");
+}
+.detail-card-icon.icon-price {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4a017' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'/%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6'/%3E%3C/svg%3E");
+}
+
+.detail-card-body {
+  padding: 14px 18px;
+}
+
+/* ---- 信息行 ---- */
+.detail-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13.5px;
+}
+.detail-info-row:last-child { border-bottom: none; }
+
+.detail-info-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+.detail-info-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ---- 价格卡片特殊样式 ---- */
+.detail-card-price {
+  border-color: rgba(212,160,23,.2);
+  background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(212,160,23,.04) 100%);
+}
+.detail-card-price .detail-card-title {
+  color: var(--gold-500);
+  background: rgba(212,160,23,.06);
+}
+
+.detail-price-hero {
+  text-align: center;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+.detail-price-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+.detail-price-number {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--green-400);
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+.detail-price-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.detail-price-rows {
+  /* inherits .detail-card-body padding context */
+}
+.detail-price-rows .detail-info-row:first-child {
+  padding-top: 6px;
+}
 
 .detail-actions {
   display: flex;
   gap: 12px;
   margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* ============ Responsive: Detail Page ============ */
+@media (max-width: 700px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .detail-image-section {
+    position: static;
+    text-align: center;
+  }
+  .detail-main-image {
+    max-width: 220px;
+  }
+  .detail-price-number {
+    font-size: 26px;
+  }
 }
 
 /* ============================================================

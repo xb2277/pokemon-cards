@@ -12,6 +12,16 @@ const API = {
 let currentCardId = null; // for detail page
 let editingImageChanged = false;
 
+// ============ Auth ============
+
+function getToken() {
+  return localStorage.getItem('token') || '';
+}
+
+function isLoggedIn() {
+  return !!getToken();
+}
+
 // ============ Utility ============
 
 function $(sel) { return document.querySelector(sel); }
@@ -19,16 +29,34 @@ function $$(sel) { return document.querySelectorAll(sel); }
 
 async function api(method, url, data) {
   const opts = { method };
+  const headers = {};
+
+  // Attach auth token
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = 'Bearer ' + token;
+  }
+
   if (!(data instanceof FormData)) {
-    opts.headers = { 'Content-Type': 'application/json' };
+    headers['Content-Type'] = 'application/json';
     if (data) opts.body = JSON.stringify(data);
   } else {
     opts.body = data;
-    // For FormData, don't set headers at all — browser auto-sets Content-Type with boundary
   }
+  opts.headers = headers;
+
   const res = await fetch(url, opts);
 
-  // Handle non-JSON responses (e.g., 415 HTML error page)
+  // Handle 401 — redirect to login
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+    throw new Error('请先登录');
+  }
+
+  // Handle non-JSON responses
   let json;
   const contentType = res.headers.get('content-type') || '';
   if (contentType.includes('application/json')) {
@@ -41,6 +69,55 @@ async function api(method, url, data) {
   if (!json.success) throw new Error(json.message || `Request failed (${res.status})`);
   return json;
 }
+
+// ============ Global Auth Nav ============
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nav = document.querySelector('.nav-bar .nav-links');
+  if (!nav) return;
+
+  const token = getToken();
+  if (token) {
+    // Fetch user info and add to nav
+    fetch('/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(r => r.json())
+    .then(json => {
+      if (json.success) {
+        const u = json.data;
+        const userMenu = document.createElement('span');
+        userMenu.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:12px;font-size:13px;';
+        userMenu.innerHTML = `
+          <span style="color:var(--text-secondary);">${u.nick_name || '用户'}</span>
+          ${u.role === 'admin' ? '<a href="/admin" style="color:var(--gold-500);font-weight:600;">管理</a>' : ''}
+          <a href="#" class="logout-link" style="color:var(--text-muted);">退出</a>
+        `;
+        nav.appendChild(userMenu);
+
+        // Bind logout click event
+        userMenu.querySelector('.logout-link').addEventListener('click', function(e) {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = '/login';
+        });
+      }
+    })
+    .catch(() => {});
+  } else {
+    const loginLink = document.createElement('a');
+    loginLink.href = '/login';
+    loginLink.textContent = '登录';
+    loginLink.style.cssText = 'margin-left:12px;';
+    nav.appendChild(loginLink);
+
+    const registerLink = document.createElement('a');
+    registerLink.href = '/register';
+    registerLink.textContent = '注册';
+    registerLink.style.cssText = 'margin-left:8px;color:var(--gold-500);';
+    nav.appendChild(registerLink);
+  }
+});
 
 function showToast(msg, type = 'info') {
   const container = $('#toastContainer') || createToastContainer();
@@ -149,14 +226,16 @@ function renderCards() {
 
   const grid = $('#cardsGrid');
   const empty = $('#emptyState');
-  const section = $('#inventorySection');
   const tbody = $('#inventoryTableBody');
+
+  // Always keep the section header visible (toggle buttons)
+  const sectionHeader = $('#inventorySection');
+  if (sectionHeader) sectionHeader.style.display = 'block';
 
   if (filtered.length === 0) {
     grid.innerHTML = '';
     if (tbody) tbody.innerHTML = '';
     empty.style.display = 'block';
-    if (section) section.style.display = 'none';
     updateStatsBar(allCards);
     return;
   }
@@ -166,8 +245,7 @@ function renderCards() {
   // Always render both views
   grid.innerHTML = filtered.map(card => renderCardItem(card)).join('');
 
-  if (section && tbody) {
-    section.style.display = 'block';
+  if (tbody) {
     tbody.innerHTML = filtered.map(card => renderTableRow(card)).join('');
   }
 
@@ -209,15 +287,15 @@ function toggleView(view) {
 
 function applyView(view) {
   const grid = $('#cardsGrid');
-  const section = $('#inventorySection');
+  const tableWrapper = $('#inventoryTableWrapper');
   if (!grid) return;
 
   if (view === 'table') {
     grid.style.display = 'none';
-    if (section) section.style.display = 'block';
+    if (tableWrapper) tableWrapper.style.display = 'block';
   } else {
     grid.style.display = 'grid';
-    if (section) section.style.display = 'none';
+    if (tableWrapper) tableWrapper.style.display = 'none';
   }
 }
 
@@ -320,9 +398,25 @@ async function saveCard(event) {
   }
 
   try {
-    const res = await api('POST', API.cards, data);
+    let res;
+    if (data.catalog_id && !currentCardId) {
+      // 新增模式 + 已选数据库卡牌 → 走 from-catalog 接口
+      const payload = {
+        catalog_id: parseInt(data.catalog_id),
+        quantity:   parseInt(data.quantity)  || 1,
+        cost_price: parseFloat(data.cost_price) || 0,
+        condition:  data.condition  || 'NM',
+        notes:      data.notes      || '',
+      };
+      res = await api('POST', '/api/cards/from-catalog', payload);
+    } else {
+      // 编辑模式 或 未选数据库卡牌（个人卡）→ 走普通接口
+      res = await api(currentCardId ? 'PUT' : 'POST',
+                 currentCardId ? `${API.cards}/${currentCardId}` : API.cards,
+                 data);
+    }
     closeModal();
-    showToast(`"${res.data.name}" 已添加`, 'success');
+    showToast(`"${res.data.name}" ${currentCardId ? '已更新' : '已添加'}`, 'success');
     loadCards();
   } catch(e) { showToast(e.message, 'error'); }
 }
@@ -446,7 +540,7 @@ function renderRankItem(item, rank, direction) {
 // ============ Price Page (price.html) ============
 
 let priceChartInstance = null;
-let currentPriceCardId = null;
+let currentCatalogId = null;
 let priceCatalogItems = [];
 
 
@@ -570,24 +664,15 @@ function renderPriceSearchDropdown(items) {
 
 
 async function selectPriceCatalogItem(item) {
-  // Call /api/cards/from-catalog
-  try {
-    const res = await api('POST', '/api/cards/from-catalog', { catalog_id: item.id });
-    const card = res.data;
-    currentPriceCardId = card.id;
+  currentCatalogId = item.id;
+  updatePriceHeroUI(item, null);
 
-    // Update hero UI
-    updatePriceHeroUI(item, card);
+  // Always show price panel — prices are tied to catalog, not user collection
+  loadCatalogPrices(item.id);
 
-    // Load price data
-    loadCardPrices(card.id);
-
-    // Sync select
-    const sel = $('#priceCatalogSelect');
-    if (sel) sel.value = item.id;
-  } catch(e) {
-    showToast('创建/查找卡牌失败: ' + e.message, 'error');
-  }
+  // Sync select
+  const sel = $('#priceCatalogSelect');
+  if (sel) sel.value = item.id;
 }
 
 
@@ -658,38 +743,34 @@ async function seedGengarIfNeeded() {
 
 
 async function ensureGengarPriceData(catalogId) {
-  // Ensure card exists, then check if it has price records
+  // Price data is tied to catalog_id, so we can seed directly
   try {
-    const cardRes = await api('POST', '/api/cards/from-catalog', { catalog_id: catalogId });
-    const cardId = cardRes.data.id;
-
     // Check existing price records
-    const priceRes = await api('GET', `/api/prices?card_id=${cardId}`);
-    if (!priceRes.data.history || priceRes.data.history.length === 0) {
-      // Insert sample price history
-      const today = new Date();
-      const samples = [];
-      let base = 1200;
-      for (let i = 60; i >= 0; i -= 3) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        const price = Math.round(base + (Math.random() - 0.5) * 300);
-        samples.push({ card_id: cardId, platform: '闲鱼', price, date: dateStr });
-        base += (Math.random() - 0.45) * 20;
-        if (base < 600) base = 600;
-        if (base > 2500) base = 2500;
-      }
-      // Bulk insert via individual API calls (simpler than bulk endpoint)
-      for (const s of samples) {
-        try {
-          await api('POST', '/api/prices/manual', {
-            card_id: s.card_id,
-            platform: s.platform,
-            price: Math.round(s.price),
-          });
-        } catch(e) {}
-      }
+    const priceRes = await api('GET', `/api/prices?catalog_id=${catalogId}`);
+    if (priceRes.data.history && priceRes.data.history.length > 0) return; // already has data
+
+    // Insert sample price history
+    const today = new Date();
+    const samples = [];
+    let base = 1200;
+    for (let i = 60; i >= 0; i -= 3) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const price = Math.round(base + (Math.random() - 0.5) * 300);
+      samples.push({ catalog_id: catalogId, platform: '闲鱼', price, date: dateStr });
+      base += (Math.random() - 0.45) * 20;
+      if (base < 600) base = 600;
+      if (base > 2500) base = 2500;
+    }
+    for (const s of samples) {
+      try {
+        await api('POST', '/api/prices/manual', {
+          catalog_id: s.catalog_id,
+          platform: s.platform,
+          price: Math.round(s.price),
+        });
+      } catch(e) {}
     }
   } catch(e) {
     console.error('ensureGengarPriceData error:', e);
@@ -697,9 +778,9 @@ async function ensureGengarPriceData(catalogId) {
 }
 
 
-async function loadCardPrices(cardId) {
+async function loadCatalogPrices(catalogId) {
   try {
-    const res = await api('GET', `/api/prices?card_id=${cardId}`);
+    const res = await api('GET', `/api/prices?catalog_id=${catalogId}`);
     const data = res.data;
     const latest = data.latest;
     const history = data.history || [];
@@ -756,38 +837,22 @@ function renderPriceChart(history) {
 
 
 async function refreshCardPrice() {
-  if (!currentPriceCardId) { showToast('请先选择一张卡', 'info'); return; }
+  if (!currentCatalogId) { showToast('请先选择一张卡', 'info'); return; }
   const btn = $('#refreshBtn');
   btn.disabled = true; btn.textContent = '抓取中...';
 
   try {
-    const cardRes = await api('GET', `/api/cards/${currentPriceCardId}`);
-    const cardName = cardRes.data.name_en || cardRes.data.name;
-
-    const tcgRes = await fetch(`/api/search-tcg?q=${encodeURIComponent(cardName)}`);
-    const tcgData = await tcgRes.json();
-
-    if (tcgData.success && tcgData.data.length > 0) {
-      const tcgCard = tcgData.data[0];
-      const prices = tcgCard.tcgplayer_prices;
-      let price = null;
-      const normal = prices.normal || {};
-      const holofoil = prices.holofoil || {};
-      if (normal.market) price = parseFloat(normal.market);
-      else if (holofoil.market) price = parseFloat(holofoil.market);
-
-      if (price) {
-        const cnyPrice = Math.round(price * 7.2 * 100) / 100;
-        await api('POST', '/api/prices/manual', { card_id: currentPriceCardId, platform: 'pokemontcg', price: cnyPrice });
-        showToast(`已从 TCG 获取价格: $${price} -> ~¥${cnyPrice}`, 'success');
-        loadCardPrices(currentPriceCardId);
-        btn.disabled = false; btn.textContent = '刷新价格';
-        return;
-      }
+    const result = await api('POST', '/api/prices/fetch', { catalog_id: currentCatalogId });
+    if (result.success) {
+      const prices = result.prices || [];
+      const priceStr = prices.map(p => `${p.platform}: ¥${p.price}`).join(', ');
+      showToast(`抓取成功！${priceStr}`, 'success');
+      loadCatalogPrices(currentCatalogId);
+    } else {
+      showToast(`抓取失败: ${result.message}`, 'info');
     }
-    showToast('TCG API 未找到该卡的价格，可手动录入', 'info');
   } catch(e) {
-    showToast('抓取失败，可手动录入价格: ' + e.message, 'error');
+    showToast('抓取失败: ' + e.message, 'error');
   }
   btn.disabled = false; btn.textContent = '刷新价格';
 }
@@ -795,14 +860,14 @@ async function refreshCardPrice() {
 
 async function submitManualPrice(event) {
   event.preventDefault();
-  if (!currentPriceCardId) return;
+  if (!currentCatalogId) return;
   const price = parseFloat($('#manualPrice').value);
   const platform = $('#manualPlatform').value.trim() || '手动录入';
   try {
-    await api('POST', '/api/prices/manual', { card_id: currentPriceCardId, platform, price });
+    await api('POST', '/api/prices/manual', { catalog_id: currentCatalogId, platform, price });
     showToast(`已录入 ¥${price}`, 'success');
     $('#manualPrice').value = '';
-    loadCardPrices(currentPriceCardId);
+    loadCatalogPrices(currentCatalogId);
   } catch(e) { showToast(e.message, 'error'); }
 }
 
@@ -818,25 +883,25 @@ async function loadDetailPage() {
   try {
     const res = await api('GET', `${API.cards}/${cardId}`);
     detailCard = res.data;
-    renderDetail(detailCard);
 
-    // Also get latest price
+    // Fetch latest price from price_records (best-effort)
+    let priceData = null;
     try {
       const priceRes = await api('GET', API.prices(cardId));
-      const latest = priceRes.data.latest;
-      if (latest.avg != null) {
-        const estTotal = latest.avg * (detailCard.quantity || 1);
-        $('#detailValueInfo').style.display = 'block';
-        $('#detailEstPrice').textContent = formatMoney(latest.avg);
-        $('#detailTotalEst').textContent = formatMoney(estTotal);
+      if (priceRes && priceRes.data && priceRes.data.latest && priceRes.data.latest.avg != null) {
+        priceData = priceRes.data.latest;
       }
-    } catch {}
+    } catch(e) {
+      console.warn('Price fetch failed:', e.message);
+    }
+
+    renderDetail(detailCard, priceData);
   } catch(e) {
     document.querySelector('.detail-grid').innerHTML = '<div class="empty-state"><p>卡牌未找到</p><a href="/" class="btn btn-outline">返回我的卡牌</a></div>';
   }
 }
 
-function renderDetail(c) {
+function renderDetail(c, priceData) {
   document.title = `${c.name} - Pokemon Card Manager`;
 
   // Image
@@ -847,18 +912,56 @@ function renderDetail(c) {
   $('#detailName').textContent = c.name;
   $('#detailNameEn').textContent = c.name_en || '';
 
-  const fields = [
+  // Use priceData.avg if available (more up-to-date than c.market_price)
+  const displayPrice = (priceData && priceData.avg > 0) ? priceData.avg : (c.market_price || 0);
+  const costPrice = c.cost_price || 0;
+  const quantity = c.quantity || 1;
+  const totalValue = displayPrice * quantity;
+  const profit = displayPrice - costPrice;
+  const profitPct = costPrice > 0 ? ((profit / costPrice) * 100).toFixed(1) : 0;
+  const priceLabel = (priceData && priceData.avg > 0) ? '元/张（实时）' : '元/张';
+
+  // ---- 基本信息卡 ----
+  $('#detailBasicInfo').innerHTML = [
     ['系列', c.set_name || '--'],
     ['编号', c.card_number || '--'],
     ['稀有度', `<span class="rarity-badge badge-${c.rarity}">${c.rarity}</span> ${rarityLabel(c.rarity)}`],
     ['品相', conditionLabel(c.condition)],
-    ['数量', c.quantity],
-    ['收购单价', formatMoney(c.cost_price)],
-    ['当下市场价', formatMoney(c.market_price), 'color:var(--gold-600)'],
-    ['持有总价', formatMoney((c.market_price||0) * (c.quantity||1)), 'color:var(--red-500);font-weight:700'],
-    ['备注', c.notes || '--'],
-  ];
-  $('#detailFields').innerHTML = fields.map(([k,v,s]) => `<dt>${k}</dt><dd${s ? ' style="'+s+'"' : ''}>${v}</dd>`).join('');
+  ].map(([k,v]) => `<div class="detail-info-row"><span class="detail-info-label">${k}</span><span class="detail-info-value">${v}</span></div>`).join('');
+
+  // ---- 持有信息卡 ----
+  $('#detailHoldInfo').innerHTML = [
+    ['持有数量', `${quantity} 张`],
+    ['收购单价', formatMoney(costPrice)],
+    ['入库备注', c.notes || '--'],
+  ].map(([k,v]) => `<div class="detail-info-row"><span class="detail-info-label">${k}</span><span class="detail-info-value">${v}</span></div>`).join('');
+
+  // ---- 价格信息卡 ----
+  $('#detailPriceInfo').innerHTML = `
+    <div class="detail-price-hero">
+      <div class="detail-price-main">
+        <span class="detail-price-number">${displayPrice > 0 ? formatMoney(displayPrice) : '暂无'}</span>
+        <span class="detail-price-unit">${priceLabel}</span>
+      </div>
+    </div>
+    <div class="detail-price-rows">
+      <div class="detail-info-row">
+        <span class="detail-info-label">持有总价</span>
+        <span class="detail-info-value" style="color:var(--red-500);font-weight:700;">${formatMoney(totalValue)}</span>
+      </div>
+      <div class="detail-info-row">
+        <span class="detail-info-label">收购成本</span>
+        <span class="detail-info-value">${formatMoney(costPrice * quantity)}</span>
+      </div>
+      ${costPrice > 0 && displayPrice > 0 ? `
+      <div class="detail-info-row" id="detailProfitRow">
+        <span class="detail-info-label">盈亏</span>
+        <span class="detail-info-value" style="color:${profit >= 0 ? 'var(--green-500)' : 'var(--red-500)'};font-weight:700;">
+          ${profit >= 0 ? '+' : ''}${formatMoney(profit)} (${profit >= 0 ? '+' : ''}${profitPct}%)
+        </span>
+      </div>` : ''}
+    </div>
+  `;
 }
 
 function openEditModal() {
@@ -1025,6 +1128,10 @@ function fillFormFromCatalog(item) {
   if (form.elements['card_number']) form.elements['card_number'].value = item.card_number || '';
   if (form.elements['rarity'])      form.elements['rarity'].value      = item.rarity || 'R';
 
+  // 写入 catalog_id（提交时走 from-catalog 接口）
+  const catIdField = $('#catalogIdField');
+  if (catIdField) catIdField.value = item.id;
+
   // Show selected card chip
   const chip = $('#catalogSelectedCard');
   const meta = [item.set_name, item.card_number, item.rarity].filter(Boolean).join(' · ');
@@ -1143,6 +1250,9 @@ function selectCatalogItem(idx) {
 function clearCatalogSelection() {
   $('#catalogSelectedCard').style.display = 'none';
   $('#cardForm').dataset.catalogImageUrl = '';
+  // 清除 catalog_id，后续提交走普通新增接口
+  const f = $('#catalogIdField');
+  if (f) f.value = '';
   // Optionally clear form fields - subtle: just clear the chip, let user keep fields
 }
 

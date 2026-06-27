@@ -21,5 +21,13 @@ SCRAPER_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKi
 SCRAPER_TIMEOUT = 15  # seconds
 
 # App config
-SECRET_KEY = 'pokemon-cards-manager-dev-2026'
-DEBUG = False  # Production-safe default; local dev can override
+SECRET_KEY = os.environ.get('SECRET_KEY', 'pokemon-cards-manager-dev-2026')
+DEBUG = False  # Always off — Railway runs with debug=False via waitress
+
+# WeChat Mini Program
+WECHAT_APPID = os.environ.get('WECHAT_APPID', '')
+WECHAT_SECRET = os.environ.get('WECHAT_SECRET', '')
+
+# Admin account (for web login)
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'kapai2026')
