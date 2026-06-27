@@ -1,6 +1,6 @@
 -- ============================================================
 -- Pokemon Cards Manager - Supabase PostgreSQL Schema
--- Run this in Supabase SQL Editor
+-- Run this in Supabase SQL Editor (all at once)
 -- ============================================================
 
 -- ============ Extensions ============
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 -- Auto-create profile when a user signs up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $body$
 BEGIN
     INSERT INTO public.profiles (id, email, username, nick_name, role)
     VALUES (
@@ -33,9 +33,10 @@ BEGIN
     ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$body$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
@@ -138,18 +139,20 @@ CREATE TABLE IF NOT EXISTS pipeline_runs (
 
 CREATE INDEX IF NOT EXISTS idx_pipeline_method ON pipeline_runs(method_id);
 
--- ============ updated_at trigger ============
+-- ============ updated_at trigger function ============
 CREATE OR REPLACE FUNCTION update_timestamp()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $body$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$body$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS cards_updated_at ON cards;
 CREATE TRIGGER cards_updated_at BEFORE UPDATE ON cards
     FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 
+DROP TRIGGER IF EXISTS catalog_updated_at ON card_catalog;
 CREATE TRIGGER catalog_updated_at BEFORE UPDATE ON card_catalog
     FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 
@@ -167,12 +170,12 @@ ALTER TABLE pipeline_runs ENABLE ROW LEVEL SECURITY;
 
 -- Helper function: check if current user is admin
 CREATE OR REPLACE FUNCTION is_admin()
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN AS $body$
     SELECT EXISTS (
         SELECT 1 FROM profiles
         WHERE id = auth.uid() AND role = 'admin'
     );
-$$ LANGUAGE SQL SECURITY DEFINER;
+$body$ LANGUAGE SQL SECURITY DEFINER;
 
 -- ---- Profiles policies ----
 CREATE POLICY "Users can view own profile" ON profiles
