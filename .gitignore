@@ -25,8 +25,8 @@ images/
 # WorkBuddy workspace
 .workbuddy/
 
-# WeChat mini program private config
-kapai_miniapp/project.private.config.json
+# WeChat mini program (not part of web service)
+kapai_miniapp/
 
 # IDEs
 .vscode/
