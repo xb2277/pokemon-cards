@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 - 宝可梦卡牌管理器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css?v=10">
+  <style>
+    .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-primary); }
+    .login-card { background: var(--bg-card); border-radius: 12px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+    .login-card h1 { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+    .login-card .subtitle { text-align: center; color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+    .login-card .form-group { margin-bottom: 20px; }
+    .login-card label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
+    .login-card input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; }
+    .login-card input:focus { outline: none; border-color: var(--gold-500); box-shadow: 0 0 0 3px rgba(212,175,95,.15); }
+    .login-btn { width: 100%; padding: 12px; background: var(--gold-500); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .login-btn:hover { background: var(--gold-600); }
+    .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .login-error { color: var(--red-500); font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <h1>POKÉ CARD</h1>
+      <p class="subtitle">宝可梦卡牌收藏册 · 登录</p>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>邮箱</label>
+          <input type="email" id="email" placeholder="请输入邮箱" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="password" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="login-btn" id="loginBtn">登 录</button>
+        <p class="login-error" id="loginError"></p>
+      </form>
+      <div style="text-align:center;margin-top:20px;font-size:13px;color:var(--text-secondary);">
+        还没有账号？<a href="./register.html" style="color:var(--gold-500);text-decoration:none;font-weight:600;">立即注册</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./assets/supabase-config.js"></script>
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('loginError');
+      if (!email || !password) { err.textContent = '请输入邮箱和密码'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = '登录中...'; err.style.display = 'none';
+      try {
+        const result = await authLogin(email, password);
+        if (result.role === 'admin') {
+          window.location.href = './admin.html';
+        } else {
+          window.location.href = './index.html';
+        }
+      } catch(e) {
+        err.textContent = e.message || '登录失败';
+        err.style.display = 'block';
+      } finally {
+        btn.disabled = false; btn.textContent = '登 录';
+      }
+    }
+
+    // Check if already logged in
+    (async () => {
+      const loggedIn = await isLoggedIn();
+      if (loggedIn) window.location.href = './index.html';
+    })();
+  </script>
+</body>
+</html>

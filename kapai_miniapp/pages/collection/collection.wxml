@@ -1,0 +1,149 @@
+<!-- 我的收藏 -->
+<view class="page-container">
+
+  <!-- Stats Strip -->
+  <view class="stats-strip" wx:if="{{stats.total > 0}}">
+    <view class="stat-item"><view class="num">{{stats.total}}</view><view class="lbl">卡牌种类</view></view>
+    <view class="stat-item"><view class="num num-gold">{{stats.qty}}</view><view class="lbl">总张数</view></view>
+    <view class="stat-item"><view class="num">{{stats.cost}}</view><view class="lbl">总成本</view></view>
+    <view class="stat-item"><view class="num num-red">{{stats.value}}</view><view class="lbl">市场总值</view></view>
+  </view>
+
+  <!-- Search -->
+  <view class="search-bar">
+    <view class="icon"></view>
+    <input placeholder="搜索卡名 / 编号 / 系列" bindinput="onSearch" value="{{search}}"/>
+  </view>
+
+  <!-- Filter Chips -->
+  <scroll-view class="filter-chips" scroll-x>
+    <view class="chip {{activeRarity === 'all' ? 'active' : ''}}" bindtap="setRarity" data-r="all">全部</view>
+    <view class="chip {{activeRarity === item ? 'active' : ''}}" wx:for="{{rarities}}" wx:key="*this" bindtap="setRarity" data-r="{{item}}">{{item}}</view>
+    <view style="width:1rpx;margin:0 4rpx;background:var(--border);"></view>
+    <view class="chip {{sortKey === item.key ? 'active' : ''}}" wx:for="{{sorts}}" wx:key="key" bindtap="setSort" data-k="{{item.key}}">{{item.label}} <text class="arrow">▼</text></view>
+  </scroll-view>
+
+  <!-- Card Grid -->
+  <view class="card-grid" wx:if="{{cards.length > 0}}">
+    <view class="card-cell" wx:for="{{cards}}" wx:key="id"
+          bindtap="goDetail" data-id="{{item.id}}"
+          bindlongpress="onLongPress" data-id="{{item.id}}" data-name="{{item.name}}">
+      <view class="cover">
+        <image wx:if="{{item.image_path}}" src="{{item.image_path}}" mode="aspectFill"/>
+        <view wx:else class="placeholder">♢</view>
+      </view>
+      <view class="info">
+        <view class="title">{{item.name}}</view>
+        <view class="meta">
+          <text class="set">{{item.card_number || item.set_name || '--'}}</text>
+          <text class="qty">x{{item.quantity}}</text>
+        </view>
+        <view class="prices">
+          <text class="cost">收 ¥{{item.cost_price || 0}}</text>
+          <text class="market">市 ¥{{item.market_price || 0}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty -->
+  <view class="empty" wx:if="{{cards.length === 0 && !loading}}">
+    <view class="icon">🃏</view>
+    <view class="msg">{{search || activeRarity !== 'all' ? '没有匹配的卡牌' : '收藏册还是空的'}}</view>
+    <view class="sub" wx:if="{{!search && activeRarity === 'all'}}">点击右下角 + 开始添加</view>
+  </view>
+
+</view>
+
+<!-- FAB: Add Card -->
+<view class="fab" bindtap="showActionSheet">+</view>
+
+<!-- ====== Bottom Sheet: Quick Add / Edit ====== -->
+<view class="modal-mask" wx:if="{{sheetVisible}}" bindtap="hideSheet">
+  <view class="modal-sheet" catchtap="noop">
+    <view class="ms-header">
+      <text class="title">{{editingId ? '编辑卡牌' : '添加卡牌'}}</text>
+      <view class="close" bindtap="hideSheet">✕</view>
+    </view>
+    <view class="ms-body">
+      <!-- Search catalog -->
+      <view class="form-field">
+        <view class="label">从图鉴快捷搜索</view>
+        <input placeholder="输入卡名搜索..." bindinput="onCatalogSearch" value="{{catalogSearch}}"/>
+      </view>
+      <view class="dropdown" wx:if="{{catalogResults.length > 0}}">
+        <view class="dropdown-item" wx:for="{{catalogResults}}" wx:key="id" bindtap="pickCatalog" data-id="{{item.id}}">
+          <image wx:if="{{item.image_url}}" src="{{item.image_url}}" class="thumb" mode="aspectFill"/>
+          <view>
+            <view class="dd-name">{{item.name}}<text wx:if="{{item.name_en}}" style="color:var(--text3);font-weight:400;"> / {{item.name_en}}</text></view>
+            <view class="dd-meta">{{item.set_name}} · {{item.card_number}} · {{item.rarity}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view style="text-align:center;margin:24rpx 0;font-size:22rpx;color:var(--text3);">— 或手动录入 —</view>
+
+      <view class="img-upload" bindtap="pickImage">
+        <image wx:if="{{form.image}}" src="{{form.image}}" mode="aspectFit"/>
+        <view wx:else class="hint">点击添加卡牌图片</view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-field">
+          <view class="label">卡名 *</view>
+          <input placeholder="皮卡丘 V" value="{{form.name}}" data-k="name" bindinput="onField"/>
+        </view>
+        <view class="form-field">
+          <view class="label">英文名</view>
+          <input placeholder="Pikachu V" value="{{form.name_en}}" data-k="name_en" bindinput="onField"/>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-field">
+          <view class="label">系列</view>
+          <input placeholder="朱紫 sV" value="{{form.set_name}}" data-k="set_name" bindinput="onField"/>
+        </view>
+        <view class="form-field">
+          <view class="label">编号</view>
+          <input placeholder="060/072" value="{{form.card_number}}" data-k="card_number" bindinput="onField"/>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-field">
+          <view class="label">稀有度</view>
+          <picker range="{{rarityPickList}}" value="{{form.rarityIdx}}" bindchange="onRarityPick">
+            <view>{{rarityPickList[form.rarityIdx]}}</view>
+          </picker>
+        </view>
+        <view class="form-field">
+          <view class="label">品相</view>
+          <picker range="{{condList}}" value="{{form.condIdx}}" bindchange="onCondPick">
+            <view>{{condList[form.condIdx]}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-field">
+          <view class="label">数量</view>
+          <input type="number" value="{{form.quantity}}" data-k="quantity" bindinput="onField"/>
+        </view>
+        <view class="form-field">
+          <view class="label">收购价 ¥</view>
+          <input type="digit" value="{{form.cost_price}}" data-k="cost_price" bindinput="onField"/>
+        </view>
+      </view>
+
+      <view class="form-field">
+        <view class="label">市场价 ¥</view>
+        <input type="digit" value="{{form.market_price}}" data-k="market_price" bindinput="onField"/>
+      </view>
+    </view>
+    <view class="ms-footer">
+      <button class="btn btn-outline" style="flex:1;" bindtap="hideSheet">取消</button>
+      <button class="btn btn-primary" style="flex:1;" bindtap="saveCard" loading="{{saving}}">收藏</button>
+    </view>
+  </view>
+</view>
