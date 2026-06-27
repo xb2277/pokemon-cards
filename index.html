@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>宝可梦卡牌管理器 | Pokemon Cards Manager</title>
+  <meta name="description" content="一个为中文版宝可梦卡牌收藏者打造的管理系统 — 卡牌入库、价格追踪、资产看板、数据采集管道">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Source+Serif+4:opsz,wght@8..60,400..700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+    :root {
+      --bg-page: #f5f0e8;
+      --bg-surface: #ffffff;
+      --bg-elevated: #faf8f4;
+      --red-400: #ef4444;
+      --red-500: #dc2626;
+      --gold-400: #d4a017;
+      --gold-500: #b8860b;
+      --gold-600: #9a7209;
+      --green-500: #047857;
+      --text-primary: #1a1a2e;
+      --text-secondary: #4b5563;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(0,0,0,.08);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+      --shadow-glow: 0 4px 20px rgba(212,160,23,.18);
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-family: 'Source Serif 4', Georgia, serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== Nav ===== */
+    nav {
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pokeball {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, var(--red-500) 0%, var(--red-500) 48%, #fff 48%, #fff 52%, var(--text-primary) 52%, var(--text-primary) 100%);
+      border: 2.5px solid var(--text-primary);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .pokeball::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2.5px solid var(--text-primary);
+    }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--red-500); }
+    .btn-github {
+      background: var(--text-primary);
+      color: #fff !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px !important;
+    }
+    .btn-github:hover { background: var(--red-500) !important; color: #fff !important; }
+
+    /* ===== Hero ===== */
+    .hero {
+      padding: 60px 0 50px;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(212,160,23,.12);
+      color: var(--gold-600);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(212,160,23,.25);
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: clamp(36px, 6vw, 56px);
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero h1 .accent { color: var(--red-500); }
+    .hero h1 .gold { color: var(--gold-500); }
+    .hero p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0 auto 32px;
+    }
+    .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--red-500);
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 4px 14px rgba(220,38,38,.3);
+      transition: all .2s;
+    }
+    .btn-primary:hover { background: var(--red-400); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(220,38,38,.4); }
+    .btn-secondary {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      border: 2px solid var(--border-subtle);
+      transition: all .2s;
+    }
+    .btn-secondary:hover { border-color: var(--gold-400); color: var(--gold-600); }
+
+    /* ===== Dashboard Mockup ===== */
+    .mockup-section {
+      padding: 20px 0 60px;
+    }
+    .mockup {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+    .mockup-bar {
+      background: var(--bg-elevated);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .mockup-bar span {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .mockup-bar span:nth-child(1) { background: #ff5f57; }
+    .mockup-bar span:nth-child(2) { background: #ffbd2e; }
+    .mockup-bar span:nth-child(3) { background: #28ca42; }
+    .mockup-bar .url {
+      margin-left: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .mockup-body { padding: 28px; }
+    .mockup-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 18px 16px;
+      border: 1px solid var(--border-subtle);
+    }
+    .stat-card .label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .value {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      margin-top: 6px;
+    }
+    .stat-card.green .value { color: var(--green-500); }
+    .stat-card.gold .value { color: var(--gold-500); }
+    .stat-card.red .value { color: var(--red-500); }
+    .mockup-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .mockup-card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+    .mockup-card-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    .mockup-card-img.c1 { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .mockup-card-img.c2 { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+    .mockup-card-img.c3 { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+    .mockup-card-img.c4 { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+    .mockup-card .name {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .mockup-card .price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--gold-500);
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* ===== Features ===== */
+    .features {
+      padding: 40px 0 60px;
+    }
+    .section-title {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-title h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 36px;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .section-title p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+      transition: all .3s;
+    }
+    .feature-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+      border-color: rgba(212,160,23,.3);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 18px;
+    }
+    .feature-icon.red { background: rgba(220,38,38,.1); }
+    .feature-icon.gold { background: rgba(212,160,23,.1); }
+    .feature-icon.green { background: rgba(4,120,87,.1); }
+    .feature-icon.blue { background: rgba(37,99,235,.1); }
+    .feature-icon.purple { background: rgba(124,58,237,.1); }
+    .feature-icon.amber { background: rgba(217,119,6,.1); }
+    .feature-card h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== Tech Stack ===== */
+    .tech {
+      padding: 40px 0 60px;
+      text-align: center;
+    }
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+    .tech-badge {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+    .tech-badge .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ===== Pipeline Section ===== */
+    .pipeline {
+      padding: 40px 0 60px;
+    }
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
+    .pipeline-step {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      min-width: 140px;
+    }
+    .pipeline-step .num {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      color: var(--gold-500);
+    }
+    .pipeline-step .title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .pipeline-step .desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .pipeline-arrow {
+      color: var(--gold-400);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    footer a { color: var(--gold-600); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .mockup-stats { grid-template-columns: repeat(2, 1fr); }
+      .mockup-cards { grid-template-columns: repeat(2, 1fr); }
+      .feature-grid { grid-template-columns: 1fr; }
+      .pipeline-flow { flex-direction: column; }
+      .pipeline-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">
+      <div class="pokeball"></div>
+      <span>卡牌管理器</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">功能</a>
+      <a href="#tech">技术栈</a>
+      <a href="#pipeline">数据管道</a>
+      <a href="https://github.com/xb2277/pokemon-cards" class="btn-github" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-tag">Flask + SQLite + 数据采集管道</div>
+    <h1>
+      <span class="accent">宝可梦卡牌</span>管理器<br>
+      <span class="gold">数字标本馆</span>
+    </h1>
+    <p>
+      为中文版宝可梦卡牌收藏者打造的一站式管理系统 —— 卡牌入库、价格追踪、资产看板、数据采集管道，还有微信小程序端。
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/xb2277/pokemon-cards" class="btn-primary" target="_blank">查看源码</a>
+      <a href="https://pokemon-cards-production.up.railway.app/" class="btn-secondary" target="_blank">在线体验</a>
+    </div>
+  </section>
+
+  <!-- Dashboard Mockup -->
+  <section class="mockup-section">
+    <div class="mockup">
+      <div class="mockup-bar">
+        <span></span><span></span><span></span>
+        <div class="url">localhost:5001</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-stats">
+          <div class="stat-card">
+            <div class="label">总卡牌种类</div>
+            <div class="value">72</div>
+          </div>
+          <div class="stat-card green">
+            <div class="label">总持有张数</div>
+            <div class="value">96</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="label">总成本</div>
+            <div class="value">&yen;5,650</div>
+          </div>
+          <div class="stat-card red">
+            <div class="label">持有总价</div>
+            <div class="value">&yen;13,775</div>
+          </div>
+        </div>
+        <div class="mockup-cards">
+          <div class="mockup-card">
+            <div class="mockup-card-img c1">⚡</div>
+            <div class="name">皮卡丘 V</div>
+            <div class="price">&yen;280</div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-img c2">🔮</div>
+            <div class="name">超梦 VSTAR</div>
+            <div class="price">&yen;450</div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-img c3">👻</div>
+            <div class="name">耿鬼 VMAX</div>
+            <div class="price">&yen;320</div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-img c4">🔥</div>
+            <div class="name">喷火龙 V</div>
+            <div class="price">&yen;520</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="section-title">
+      <h2>核心功能</h2>
+      <p>从入库到估值，从采集到分析，全覆盖</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon red">📚</div>
+        <h3>卡牌仓库管理</h3>
+        <p>卡片/表格双视图，支持搜索、筛选、排序、分页。每张卡记录系列、编号、稀有度、持有数量、收购成本。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon gold">💰</div>
+        <h3>价格追踪体系</h3>
+        <p>集换社参考价录入，支持多数据源价格记录。详情页展示市场价、持有总价、收购成本、盈亏百分比。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">📊</div>
+        <h3>资产看板</h3>
+        <p>总卡牌种类、持有张数、总成本、市场估值一目了然。盈亏百分比实时计算，收藏投资两手抓。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue">🗄️</div>
+        <h3>卡牌数据库</h3>
+        <p>72 张中文版热门卡牌目录，覆盖朱&紫、剑&盾、太阳&月亮系列。独立于个人仓库，可批量导入。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple">🔄</div>
+        <h3>数据采集管道</h3>
+        <p>标准化管道框架，方法注册表 + 幂等执行 + 执行历史追踪。当前已注册人工策展方法，后续可扩展自动抓取。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon amber">👤</div>
+        <h3>用户系统</h3>
+        <p>注册/登录（邮箱或用户名）、JWT Token 认证、角色权限控制。微信绑定接口已预留。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="tech" id="tech">
+    <div class="section-title">
+      <h2>技术栈</h2>
+      <p>轻量、可靠、可部署</p>
+    </div>
+    <div class="tech-badges">
+      <div class="tech-badge"><span class="dot" style="background:#3776ab"></span>Python 3.13</div>
+      <div class="tech-badge"><span class="dot" style="background:#dc2626"></span>Flask</div>
+      <div class="tech-badge"><span class="dot" style="background:#003b57"></span>SQLite (WAL)</div>
+      <div class="tech-badge"><span class="dot" style="background:#a91e50"></span>Jinja2</div>
+      <div class="tech-badge"><span class="dot" style="background:#f7df1e"></span>原生 JS</div>
+      <div class="tech-badge"><span class="dot" style="background:#dc2626"></span>JWT 认证</div>
+      <div class="tech-badge"><span class="dot" style="background:#7c3aed"></span>Playwright</div>
+      <div class="tech-badge"><span class="dot" style="background:#9a7209"></span>Railway 部署</div>
+    </div>
+  </section>
+
+  <!-- Pipeline -->
+  <section class="pipeline" id="pipeline">
+    <div class="section-title">
+      <h2>数据采集管道</h2>
+      <p>标准化的可重复执行流程</p>
+    </div>
+    <div class="pipeline-flow">
+      <div class="pipeline-step">
+        <div class="num">STEP 1</div>
+        <div class="title">数据源</div>
+        <div class="desc">JSON 数据文件</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="num">STEP 2</div>
+        <div class="title">管道方法</div>
+        <div class="desc">@register_method</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="num">STEP 3</div>
+        <div class="title">幂等执行</div>
+        <div class="desc">去重 + 更新</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="num">STEP 4</div>
+        <div class="title">历史追踪</div>
+        <div class="desc">pipeline_runs 表</div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="num">STEP 5</div>
+        <div class="title">API + CLI</div>
+        <div class="desc">双入口触发</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      <strong>宝可梦卡牌管理器</strong> &mdash; 小众爱好数字标本馆<br>
+      <a href="https://github.com/xb2277/pokemon-cards">GitHub 仓库</a> ·
+      <a href="https://pokemon-cards-production.up.railway.app/">在线 Demo</a> ·
+      Powered by Flask &amp; SQLite
+    </p>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "资产看板",
-  "usingComponents": {
-    "ec-canvas": "/components/ec-canvas/ec-canvas"
-  }
-}
