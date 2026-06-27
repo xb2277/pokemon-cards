@@ -91,15 +91,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 let currentPage = 1;
 let totalPages = 1;
 let totalCards = 0;
-<<<<<<<< Updated upstream:assets/app.js
-========
 const PER_PAGE = 24;
->>>>>>>> Stashed changes:static/app.js
 let debounceTimer = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!$('#cardsGrid')) return;
-<<<<<<<< Updated upstream:assets/app.js
 
   // Check auth
   const loggedIn = await isLoggedIn();
@@ -109,10 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   loadCards(1);
-========
-  loadCards(1);
   loadRarityOptions();
->>>>>>>> Stashed changes:static/app.js
 
   $('#searchInput').addEventListener('input', () => {
     clearTimeout(debounceTimer);
@@ -135,22 +128,10 @@ async function loadCards(page = 1) {
   const rarity = $('#rarityFilter').value;
   const sortBy = $('#sortBySelect').value;
 
-<<<<<<<< Updated upstream:assets/app.js
   try {
     const { data: cards, total } = await fetchCards({ page, perPage: PER_PAGE, search, rarity, sortBy });
     totalCards = total;
     totalPages = Math.ceil(total / PER_PAGE) || 1;
-========
-  const params = new URLSearchParams({ sort_by: sortBy, page: String(page), per_page: String(PER_PAGE) });
-  if (search) params.set('search', search);
-  if (rarity && rarity !== 'all') params.set('rarity', rarity);
-
-  try {
-    const res = await api('GET', `${API.cards}?${params}`);
-    const cards = res.data || [];
-    totalCards = res.total || 0;
-    totalPages = Math.ceil(totalCards / PER_PAGE) || 1;
->>>>>>>> Stashed changes:static/app.js
     renderCards(cards);
     renderPagination();
     updateStatsBar(cards, totalCards);
@@ -172,10 +153,6 @@ function renderCards(cards) {
   }
 
   empty.style.display = 'none';
-<<<<<<<< Updated upstream:assets/app.js
-  grid.innerHTML = cards.map(card => renderCardItem(card)).join('');
-  if (tbody) tbody.innerHTML = cards.map(card => renderTableRow(card)).join('');
-========
 
   // Always render both views
   grid.innerHTML = cards.map(card => renderCardItem(card)).join('');
@@ -185,7 +162,6 @@ function renderCards(cards) {
   }
 
   // Show/hide based on current view
->>>>>>>> Stashed changes:static/app.js
   applyView(currentView);
 }
 
@@ -197,10 +173,7 @@ function renderPagination() {
   let html = `<span class="page-info">共 ${totalCards} 条 / 第 ${currentPage}/${totalPages} 页</span>`;
   if (currentPage > 1) html += `<button class="btn btn-outline btn-sm" onclick="loadCards(${currentPage - 1})">上一页</button>`;
 
-<<<<<<<< Updated upstream:assets/app.js
-========
   // Page numbers: show first, last, and ±2 around current
->>>>>>>> Stashed changes:static/app.js
   const range = new Set([1, totalPages]);
   for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) range.add(i);
   let prev = 0;
@@ -291,6 +264,13 @@ function updateStatsBar(cards, totalCount) {
   `;
 }
 
+function loadRarityOptions() {
+  const sel = $('#rarityFilter');
+  if (!sel) return;
+  const rarities = ['C','U','R','RR','SR','SAR','UR','CSR','HR'];
+  sel.innerHTML = '<option value="all">全部稀有度</option>' + rarities.map(r => `<option value="${r}">${r} - ${rarityLabel(r)}</option>`).join('');
+}
+
 // ============ Add/Edit Modal ============
 
 function openAddModal() {
@@ -351,11 +331,7 @@ async function saveCard(event) {
       result = await createCard(data);
     }
     closeModal();
-<<<<<<<< Updated upstream:assets/app.js
     showToast(`"${result.name}" 已添加`, 'success');
-========
-    showToast(`"${res.data.name}" ${currentCardId ? '已更新' : '已添加'}`, 'success');
->>>>>>>> Stashed changes:static/app.js
     loadCards(currentPage);
   } catch(e) { showToast(e.message, 'error'); }
 }
