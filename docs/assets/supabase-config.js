@@ -59,7 +59,7 @@ async function isAdmin() {
 // Data access layer (replaces fetch('/api/...'))
 // ============================================================
 
-const PER_PAGE = 24;
+var PER_PAGE = 24;
 
 // ---- Cards CRUD ----
 

@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 let currentPage = 1;
 let totalPages = 1;
 let totalCards = 0;
-const PER_PAGE = 24;
 let debounceTimer = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
