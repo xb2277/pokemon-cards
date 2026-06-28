@@ -2,7 +2,7 @@
 
 let catalogPage = 1;
 let catalogTotal = 0;
-let catalogPerPage = 60;
+let catalogPerPage = 50;
 let catalogDebounce = null;
 let editingCatalogId = null;
 let deleteCatalogId = null;
@@ -89,8 +89,9 @@ function renderCatalogTable(items) {
         <div class="table-card-cell">
           ${item.image_url
             ? `<img class="table-thumb" src="${item.image_url}" alt="${item.name}" loading="lazy"
-                onerror="this.outerHTML='<span style=\\'color:var(--text-muted);font-size:20px\\'>🃏</span>'">`
-            : '<span style="color:var(--text-muted);font-size:18px;">🃏</span>'
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+              + `<div class="table-thumb-placeholder" style="display:none;">🃏</div>`
+            : '<div class="table-thumb-placeholder">🃏</div>'
           }
           <div><strong>${item.name}</strong></div>
         </div>
@@ -101,7 +102,7 @@ function renderCatalogTable(items) {
       <td>${item.rarity ? `<span class="rarity-badge badge-${item.rarity}">${item.rarity}</span>` : '--'}</td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="openCatalogEditModal(${item.id})">编辑</button>
-        <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="promptCatalogDelete(${item.id},'${item.name}')">删除</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="promptCatalogDelete(${item.id},'${item.name.replace(/'/g, "\\'")}')">删除</button>
       </td>
     </tr>`
   ).join('');
