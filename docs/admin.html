@@ -16,9 +16,10 @@
     }
     .admin-header h1 { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
     .admin-header .brand-icon { width: 32px; height: 32px; background: var(--gold-500); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; }
-    .admin-nav { display: flex; gap: 12px; align-items: center; }
-    .admin-nav a { font-size: 13px; color: var(--text-secondary); text-decoration: none; cursor: pointer; }
-    .admin-nav a:hover { color: var(--gold-500); }
+    .admin-nav { display: flex; gap: 6px; align-items: center; }
+    .admin-nav a, .admin-nav .nav-tab { font-size: 13px; color: var(--text-secondary); text-decoration: none; cursor: pointer; padding: 6px 14px; border-radius: 6px; }
+    .admin-nav a:hover, .admin-nav .nav-tab:hover { color: var(--gold-500); background: rgba(212,175,55,.08); }
+    .admin-nav .nav-tab.active { background: var(--gold-500); color: #fff; font-weight: 600; }
     .section-title {
       font-size: 15px; font-weight: 700; margin-bottom: 16px;
       display: flex; align-items: center; gap: 8px;
@@ -64,6 +65,8 @@
       <div class="admin-nav">
         <a href="./index.html">前台首页</a>
         <a href="./catalog.html">卡牌数据库</a>
+        <a class="nav-tab active">用户管理</a>
+        <a class="nav-tab" href="./admin-cards.html">卡牌管理</a>
         <a onclick="doLogout()">退出登录</a>
       </div>
     </div>
@@ -80,58 +83,6 @@
         <thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>昵称</th><th>角色</th><th>卡牌数</th><th>注册时间</th></tr></thead>
         <tbody id="usersTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">加载中...</td></tr></tbody>
       </table>
-    </div>
-
-    <!-- Catalog -->
-    <div class="section-title">📖 卡牌数据库管理</div>
-    <div class="catalog-actions">
-      <button class="btn btn-primary btn-sm" onclick="openCatalogModal()">新增卡种</button>
-      <button class="btn btn-outline btn-sm" onclick="loadCatalogItems()">刷新列表</button>
-    </div>
-    <div class="table-wrapper">
-      <table>
-        <thead><tr><th>ID</th><th>图片</th><th>名称</th><th>系列</th><th>编号</th><th>稀有度</th><th>操作</th></tr></thead>
-        <tbody id="catalogTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">加载中...</td></tr></tbody>
-      </table>
-    </div>
-
-    <!-- Catalog Edit Modal -->
-    <div class="modal-overlay" id="catalogModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 id="catalogModalTitle">新增卡种</h2>
-          <button class="modal-close" onclick="closeCatalogModal()">&times;</button>
-        </div>
-        <form id="catalogForm" onsubmit="saveCatalogItem(event)">
-          <div class="modal-body">
-            <input type="hidden" id="catalogEditId">
-            <div class="form-row">
-              <div class="form-group"><label>名称 *</label><input type="text" id="catName" required></div>
-              <div class="form-group"><label>英文名</label><input type="text" id="catNameEn"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>系列</label><input type="text" id="catSetName"></div>
-              <div class="form-group"><label>编号</label><input type="text" id="catCardNumber"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>稀有度</label>
-                <select id="catRarity">
-                  <option value="C">C</option><option value="U">U</option><option value="R" selected>R</option>
-                  <option value="RR">RR</option><option value="SR">SR</option><option value="SAR">SAR</option>
-                  <option value="UR">UR</option><option value="CSR">CSR</option><option value="HR">HR</option>
-                </select>
-              </div>
-              <div class="form-group"><label>图片URL</label><input type="url" id="catImageUrl" placeholder="https://..."></div>
-            </div>
-            <div class="form-group"><label>描述</label><textarea id="catDesc" rows="2"></textarea></div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeCatalogModal()">取消</button>
-            <button type="submit" class="btn btn-primary">保存</button>
-          </div>
-        </form>
-      </div>
     </div>
 
     <div id="toastContainer" class="toast-container"></div>
@@ -216,110 +167,6 @@
           </tr>`).join('');
       } catch (e) {
         document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red-500);">加载失败：${e.message}</td></tr>`;
-      }
-    }
-
-    // ---- Catalog Management ----
-    async function loadCatalogItems() {
-      try {
-        const { data, error } = await supabase
-          .from('card_catalog')
-          .select('*')
-          .order('set_name', { ascending: true })
-          .order('card_number', { ascending: true })
-          .limit(500);
-
-        if (error) throw error;
-
-        document.getElementById('catalogTableBody').innerHTML = (data || []).map(c => `
-          <tr>
-            <td>${c.id}</td>
-            <td>${c.image_url ? `<img src="${c.image_url}" style="width:36px;height:48px;border-radius:4px;object-fit:cover;">` : '--'}</td>
-            <td style="font-weight:600;">${c.name}</td>
-            <td>${c.set_name || '--'}</td>
-            <td style="font-family:monospace;font-size:11px;">${c.card_number || '--'}</td>
-            <td><span class="rarity-badge badge-${c.rarity || 'C'}">${c.rarity || '--'}</span></td>
-            <td>
-              <button class="btn btn-outline btn-sm" onclick="editCatalogItem(${c.id})">编辑</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteCatalogItem(${c.id}, '${(c.name || '').replace(/'/g, "\\'")}')" style="margin-left:4px;">删除</button>
-            </td>
-          </tr>`).join('');
-      } catch (e) {
-        document.getElementById('catalogTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red-500);">加载失败：${e.message}</td></tr>`;
-      }
-    }
-
-    function openCatalogModal() {
-      document.getElementById('catalogEditId').value = '';
-      document.getElementById('catalogModalTitle').textContent = '新增卡种';
-      document.getElementById('catalogForm').reset();
-      document.getElementById('catRarity').value = 'R';
-      document.getElementById('catalogModal').classList.add('show');
-    }
-
-    function closeCatalogModal() {
-      document.getElementById('catalogModal').classList.remove('show');
-    }
-
-    async function editCatalogItem(id) {
-      try {
-        const c = await fetchCatalogById(id);
-        document.getElementById('catalogEditId').value = c.id;
-        document.getElementById('catalogModalTitle').textContent = '编辑卡种';
-        document.getElementById('catName').value = c.name || '';
-        document.getElementById('catNameEn').value = c.name_en || '';
-        document.getElementById('catSetName').value = c.set_name || '';
-        document.getElementById('catCardNumber').value = c.card_number || '';
-        document.getElementById('catRarity').value = c.rarity || 'R';
-        document.getElementById('catImageUrl').value = c.image_url || '';
-        document.getElementById('catDesc').value = c.description || '';
-        document.getElementById('catalogModal').classList.add('show');
-      } catch (e) {
-        showToast(e.message, 'error');
-      }
-    }
-
-    async function saveCatalogItem(e) {
-      e.preventDefault();
-      const id = document.getElementById('catalogEditId').value;
-      const data = {
-        name: document.getElementById('catName').value.trim(),
-        name_en: document.getElementById('catNameEn').value.trim(),
-        set_name: document.getElementById('catSetName').value.trim(),
-        card_number: document.getElementById('catCardNumber').value.trim(),
-        rarity: document.getElementById('catRarity').value,
-        image_url: document.getElementById('catImageUrl').value.trim(),
-        description: document.getElementById('catDesc').value.trim()
-      };
-
-      try {
-        if (id) {
-          const { error } = await supabase.from('card_catalog').update(data).eq('id', id);
-          if (error) throw error;
-          showToast('已更新');
-        } else {
-          const { error } = await supabase.from('card_catalog').insert(data);
-          if (error) throw error;
-          showToast('已新增');
-        }
-        closeCatalogModal();
-        loadCatalogItems();
-        loadAdminStats();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    async function deleteCatalogItem(id, name) {
-      if (!confirm('确定要删除 "' + name + '" 吗？此操作不可恢复。')) return;
-      try {
-        const { error } = await supabase.from('card_catalog').delete().eq('id', id);
-        if (error) throw error;
-        showToast('已删除');
-        loadCatalogItems();
-        loadAdminStats();
-      } catch (e) {
-        showToast(e.message, 'error');
       }
     }
 
