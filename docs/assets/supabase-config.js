@@ -3,16 +3,20 @@
 // ============================================================
 // Replace these with your actual Supabase project credentials
 // Find them at: Supabase Dashboard → Settings → API
-const SUPABASE_URL = 'https://hlmhvuszhugpsvjolgjr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsbWh2dXN6aHVncHN2am9sZ2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjAxMjUsImV4cCI6MjA5ODEzNjEyNX0.w9j6uYE5ZgK71oYQK9VWXiCX8uLUnR97T2cA5E4N2uY';
+var SUPABASE_URL = 'https://hlmhvuszhugpsvjolgjr.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsbWh2dXN6aHVncHN2am9sZ2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjAxMjUsImV4cCI6MjA5ODEzNjEyNX0.w9j6uYE5ZgK71oYQK9VWXiCX8uLUnR97T2cA5E4N2uY';
 
 // Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true
   }
 });
+
+// Convenience alias (var won't throw if re-declared)
+var supabase = window.supabaseClient;
 
 // ============================================================
 // Auth helpers (replace old JWT token system)
@@ -55,7 +59,7 @@ async function isAdmin() {
 // Data access layer (replaces fetch('/api/...'))
 // ============================================================
 
-const PER_PAGE = 24;
+var PER_PAGE = 24;
 
 // ---- Cards CRUD ----
 
