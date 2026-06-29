@@ -1942,3 +1942,35 @@ select option {
   border: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
+
+/* ── Category Tabs ── */
+.category-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 14px 24px 0;
+  border-bottom: 2px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.category-tab {
+  padding: 9px 20px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s, background .15s;
+  white-space: nowrap;
+}
+.category-tab:hover {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+.category-tab.active {
+  color: var(--red-500);
+  border-bottom-color: var(--red-500);
+  background: var(--bg-page);
+}

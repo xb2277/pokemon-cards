@@ -8,12 +8,25 @@ let editingCatalogId = null;
 let deleteCatalogId = null;
 let bulkItems = [];
 let catalogViewMode = 'table';
+let catalogLanguage = 'zh'; // 默认国内卡
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.getElementById('catalogGrid')) return;
   loadCatalog(1);
   loadCatalogSets();
 });
+
+function switchCatalogCategory(lang) {
+  catalogLanguage = lang;
+  // 切换 Tab 高亮
+  document.querySelectorAll('.category-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.category === lang);
+  });
+  // 重置搜索和过滤
+  document.getElementById('catalogSetFilter').value = '';
+  loadCatalogSets();
+  loadCatalog(1);
+}
 
 function toggleCatalogView(mode) {
   catalogViewMode = mode;
@@ -43,6 +56,11 @@ async function loadCatalog(page = 1) {
 
   try {
     let query = supabase.from('card_catalog').select('*', { count: 'exact' });
+
+    // 语言/大类过滤
+    if (catalogLanguage) {
+      query = query.eq('language', catalogLanguage);
+    }
 
     if (search) {
       const s = search.replace(/'/g, "''");
@@ -162,8 +180,14 @@ function renderPagination() {
 
 async function loadCatalogSets() {
   try {
-    const sets = await fetchCatalogSets();
+    let query = supabase.from('card_catalog').select('set_name');
+    if (catalogLanguage) query = query.eq('language', catalogLanguage);
+    const { data, error } = await query;
+    if (error) throw error;
+    const sets = [...new Set((data || []).map(r => r.set_name).filter(Boolean))].sort();
     const sel = document.getElementById('catalogSetFilter');
+    // 保留第一个「全部系列」option
+    sel.innerHTML = '<option value="">全部系列</option>';
     sets.forEach(s => {
       const opt = document.createElement('option');
       opt.value = s;
