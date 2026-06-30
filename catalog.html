@@ -57,15 +57,17 @@
   <!-- ===== Stats Bar ===== -->
   <div class="stats-bar" id="catalogStats"></div>
 
+  <!-- ===== View Toggle Header (always visible) ===== -->
+  <div class="section-header" id="catalogViewHeader">
+    <h2 class="section-title">卡种列表</h2>
+    <div class="section-actions">
+      <button class="btn btn-outline btn-sm" id="btnCatalogTableView" onclick="toggleCatalogView('table')">📋 表格视图</button>
+      <button class="btn btn-outline btn-sm active" id="btnCatalogGridView"  onclick="toggleCatalogView('grid')">🃏 卡片视图</button>
+    </div>
+  </div>
+
   <!-- ===== Catalog Table View ===== -->
   <div class="inventory-section" id="catalogTableSection" style="display:none;">
-    <div class="section-header">
-      <h2 class="section-title">卡种列表</h2>
-      <div class="section-actions">
-        <button class="btn btn-outline btn-sm" id="btnCatalogTableView" onclick="toggleCatalogView('table')">📋 表格视图</button>
-        <button class="btn btn-outline btn-sm active" id="btnCatalogGridView"  onclick="toggleCatalogView('grid')">🃏 卡片视图</button>
-      </div>
-    </div>
     <div class="table-wrapper">
       <table class="inventory-table">
         <thead>
@@ -216,7 +218,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./assets/supabase-config.js?v=12"></script>
 <script src="./assets/app.js?v=12"></script>
-<script src="./assets/catalog.js?v=18"></script>
+<script src="./assets/catalog.js?v=19"></script>
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
     const loggedIn = await isLoggedIn();
