@@ -1862,6 +1862,34 @@ select option {
   font-size: 10px;
   color: var(--text-muted);
 }
+.catalog-card-add-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--red-500);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s, transform .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  z-index: 2;
+}
+.catalog-card-add-btn:hover {
+  background: var(--red-400);
+  transform: scale(1.12);
+}
+.catalog-card:hover .catalog-card-add-btn { opacity: 1; }
+
+/* 保留旧的 edit-btn 选择器以免其他地方引用报错，已不渲染 */
 .catalog-card-edit-btn {
   position: absolute;
   top: 6px;

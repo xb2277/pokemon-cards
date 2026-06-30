@@ -4,70 +4,82 @@ let catalogPage = 1;
 let catalogTotal = 0;
 let catalogPerPage = 50;
 let catalogDebounce = null;
-let editingCatalogId = null;
-let deleteCatalogId = null;
 let bulkItems = [];
-let catalogViewMode = 'table';
-let catalogLanguage = 'zh'; // 默认国内卡
+let catalogViewMode = 'table';   // 'table' | 'grid'
+let catalogLanguage = 'zh';       // 默认国内卡
+
+// 「加入我的卡牌」弹窗的当前 catalogId
+let addingCatalogId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.getElementById('catalogGrid')) return;
+  // 初始高亮表格视图按钮
+  syncViewButtons();
   loadCatalog(1);
   loadCatalogSets();
 });
 
+// ── Category Tabs ──
+
 function switchCatalogCategory(lang) {
   catalogLanguage = lang;
-  // 切换 Tab 高亮
   document.querySelectorAll('.category-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.category === lang);
   });
-  // 重置搜索和过滤
   document.getElementById('catalogSetFilter').value = '';
   loadCatalogSets();
   loadCatalog(1);
 }
 
+// ── View Toggle ──
+
+function syncViewButtons() {
+  const btnT = document.getElementById('btnCatalogTableView');
+  const btnG = document.getElementById('btnCatalogGridView');
+  if (!btnT || !btnG) return;
+  if (catalogViewMode === 'table') {
+    btnT.classList.add('active');
+    btnG.classList.remove('active');
+  } else {
+    btnG.classList.add('active');
+    btnT.classList.remove('active');
+  }
+}
+
 function toggleCatalogView(mode) {
   catalogViewMode = mode;
   const tableSec = document.getElementById('catalogTableSection');
-  const gridEl = document.getElementById('catalogGrid');
-  const btnT = document.getElementById('btnCatalogTableView');
-  const btnG = document.getElementById('btnCatalogGridView');
+  const gridEl   = document.getElementById('catalogGrid');
   if (mode === 'table') {
     tableSec.style.display = '';
-    gridEl.style.display = 'none';
-    if (btnT) btnT.classList.add('active');
-    if (btnG) btnG.classList.remove('active');
+    gridEl.style.display   = 'none';
   } else {
     tableSec.style.display = 'none';
-    gridEl.style.display = '';
-    if (btnG) btnG.classList.add('active');
-    if (btnT) btnT.classList.remove('active');
+    gridEl.style.display   = '';
   }
+  syncViewButtons();
   loadCatalog(catalogPage);
 }
 
+// ── Load Data ──
+
 async function loadCatalog(page = 1) {
   catalogPage = page;
-  const search = document.getElementById('catalogSearch').value.trim();
+  const search   = document.getElementById('catalogSearch').value.trim();
   const set_name = document.getElementById('catalogSetFilter').value;
-  const rarity = document.getElementById('catalogRarityFilter').value;
+  const rarity   = document.getElementById('catalogRarityFilter').value;
 
   try {
     let query = supabase.from('card_catalog').select('*', { count: 'exact' });
 
-    // 语言/大类过滤
-    if (catalogLanguage) {
-      query = query.eq('language', catalogLanguage);
-    }
+    if (catalogLanguage) query = query.eq('language', catalogLanguage);
 
     if (search) {
       const s = search.replace(/'/g, "''");
       query = query.or(`name.ilike.%${s}%,name_en.ilike.%${s}%,card_number.ilike.%${s}%,set_name.ilike.%${s}%`);
     }
     if (set_name && set_name !== 'all') query = query.eq('set_name', set_name);
-    if (rarity && rarity !== 'all') query = query.eq('rarity', rarity);
+    if (rarity   && rarity   !== 'all') query = query.eq('rarity',   rarity);
 
     query = query.order('set_name', { ascending: true }).order('card_number', { ascending: true });
 
@@ -94,6 +106,8 @@ async function loadCatalog(page = 1) {
   }
 }
 
+// ── Render: Table ──
+
 function renderCatalogTable(items) {
   const tbody = document.getElementById('catalogTableBody');
   if (!tbody) return;
@@ -101,12 +115,13 @@ function renderCatalogTable(items) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">暂无数据</td></tr>';
     return;
   }
-  tbody.innerHTML = items.map(item =>
-    `<tr>
+  tbody.innerHTML = items.map(item => {
+    const safeName = item.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return `<tr>
       <td>
         <div class="table-card-cell">
           ${item.image_url
-            ? `<img class="table-thumb" src="${item.image_url}" alt="${item.name}" loading="lazy"
+            ? `<img class="table-thumb" src="${item.image_url}" alt="${safeName}" loading="lazy"
                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
               + `<div class="table-thumb-placeholder" style="display:none;">🃏</div>`
             : '<div class="table-thumb-placeholder">🃏</div>'
@@ -119,21 +134,24 @@ function renderCatalogTable(items) {
       <td><code style="font-size:11px;">${item.card_number || item.set_code || '--'}</code></td>
       <td>${item.rarity ? `<span class="rarity-badge badge-${item.rarity}">${item.rarity}</span>` : '--'}</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="openCatalogEditModal(${item.id})">编辑</button>
-        <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="promptCatalogDelete(${item.id},'${item.name.replace(/'/g, "\\'")}')">删除</button>
+        <button class="btn btn-primary btn-sm"
+          onclick="openAddToMyCards(${item.id})">＋ 加入我的卡牌</button>
       </td>
-    </tr>`
-  ).join('');
+    </tr>`;
+  }).join('');
 }
 
+// ── Render: Grid ──
+
 function renderCatalogGrid(items) {
-  const grid = document.getElementById('catalogGrid');
+  const grid  = document.getElementById('catalogGrid');
   const empty = document.getElementById('catalogEmpty');
   if (!items.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   grid.innerHTML = items.map(item => {
     const imgHtml = item.image_url
-      ? `<img class="catalog-card-img" src="${item.image_url}" alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      ? `<img class="catalog-card-img" src="${item.image_url}" alt="${item.name}" loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         + `<div class="catalog-card-img-placeholder" style="display:none;">🃏</div>`
       : `<div class="catalog-card-img-placeholder">🃏</div>`;
     return `
@@ -146,10 +164,14 @@ function renderCatalogGrid(items) {
             ${item.rarity ? `<span class="rarity-badge badge-${item.rarity}" style="font-size:9px;padding:1px 5px;">${item.rarity}</span>` : ''}
           </div>
         </div>
-        <button class="catalog-card-edit-btn" onclick="event.stopPropagation();openCatalogEditModal(${item.id})" title="编辑">✏️</button>
+        <button class="catalog-card-add-btn"
+          onclick="event.stopPropagation();openAddToMyCards(${item.id})"
+          title="加入我的卡牌">＋</button>
       </div>`;
   }).join('');
 }
+
+// ── Render: Stats / Pagination ──
 
 function renderCatalogStats(total, shown) {
   const bar = document.getElementById('catalogStats');
@@ -178,6 +200,8 @@ function renderPagination() {
   el.innerHTML = html;
 }
 
+// ── Load Sets ──
+
 async function loadCatalogSets() {
   try {
     let query = supabase.from('card_catalog').select('set_name');
@@ -186,12 +210,10 @@ async function loadCatalogSets() {
     if (error) throw error;
     const sets = [...new Set((data || []).map(r => r.set_name).filter(Boolean))].sort();
     const sel = document.getElementById('catalogSetFilter');
-    // 保留第一个「全部系列」option
     sel.innerHTML = '<option value="">全部系列</option>';
     sets.forEach(s => {
       const opt = document.createElement('option');
-      opt.value = s;
-      opt.textContent = s;
+      opt.value = s; opt.textContent = s;
       sel.appendChild(opt);
     });
   } catch (e) {}
@@ -202,121 +224,80 @@ function debounceCatalogSearch() {
   catalogDebounce = setTimeout(() => loadCatalog(1), 280);
 }
 
-// ── Add / Edit Modal ──
+// ════════════════════════════════════════════
+// 「加入我的卡牌」Modal
+// ════════════════════════════════════════════
 
-function openCatalogAddModal() {
-  editingCatalogId = null;
-  document.getElementById('catalogModalTitle').textContent = '新增卡种';
-  document.getElementById('catalogForm').reset();
-  document.getElementById('catalogImgPreview').style.display = 'none';
-  document.getElementById('catalogSubmitBtn').textContent = '保存';
-  document.getElementById('catalogModal').classList.add('show');
-}
+async function openAddToMyCards(catalogId) {
+  addingCatalogId = catalogId;
 
-async function openCatalogEditModal(id) {
+  // 重置表单
+  document.getElementById('addCardQty').value       = 1;
+  document.getElementById('addCardCost').value      = '';
+  document.getElementById('addCardCondition').value = 'NM';
+  document.getElementById('addCardNotes').value     = '';
+
+  // 加载卡牌信息
   try {
-    const item = await fetchCatalogById(id);
-    editingCatalogId = id;
-    document.getElementById('catalogModalTitle').textContent = '编辑卡种';
-    document.getElementById('catalogSubmitBtn').textContent = '更新';
-    const form = document.getElementById('catalogForm');
-    form.reset();
-    form.elements['name'].value = item.name || '';
-    form.elements['name_en'].value = item.name_en || '';
-    form.elements['set_name'].value = item.set_name || '';
-    form.elements['set_code'].value = item.set_code || '';
-    form.elements['card_number'].value = item.card_number || '';
-    form.elements['rarity'].value = item.rarity || '';
-    form.elements['image_url'].value = item.image_url || '';
-    form.elements['description'].value = item.description || '';
-    previewCatalogImg(item.image_url);
-    document.getElementById('catalogModal').classList.add('show');
+    const { data: item, error } = await supabase
+      .from('card_catalog').select('*').eq('id', catalogId).single();
+    if (error) throw error;
 
-    const footer = document.querySelector('#catalogModal .modal-footer');
-    const existingDel = footer.querySelector('.btn-danger');
-    if (!existingDel) {
-      const delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.className = 'btn btn-danger';
-      delBtn.style.marginRight = 'auto';
-      delBtn.textContent = '删除';
-      delBtn.onclick = () => { closeCatalogModal(); promptCatalogDelete(id, item.name); };
-      footer.insertBefore(delBtn, footer.firstChild);
+    document.getElementById('addCardPreviewName').textContent = item.name || '';
+    document.getElementById('addCardPreviewMeta').textContent =
+      [item.set_name, item.card_number, item.rarity].filter(Boolean).join(' · ');
+
+    const img  = document.getElementById('addCardPreviewImg');
+    const ph   = document.getElementById('addCardPreviewPlaceholder');
+    if (item.image_url) {
+      img.src = item.image_url;
+      img.style.display = 'block';
+      ph.style.display  = 'none';
+      img.onerror = () => { img.style.display = 'none'; ph.style.display = 'flex'; };
     } else {
-      existingDel.onclick = () => { closeCatalogModal(); promptCatalogDelete(id, item.name); };
+      img.style.display = 'none';
+      ph.style.display  = 'flex';
     }
-  } catch (e) { showToast('加载失败: ' + e.message, 'error'); }
+  } catch (e) {
+    document.getElementById('addCardPreviewName').textContent = '卡牌信息加载失败';
+  }
+
+  document.getElementById('addToMyCardsModal').classList.add('show');
 }
 
-function closeCatalogModal() {
-  document.getElementById('catalogModal').classList.remove('show');
-  editingCatalogId = null;
-  const delBtn = document.querySelector('#catalogModal .btn-danger');
-  if (delBtn) delBtn.remove();
+function closeAddToMyCardsModal() {
+  document.getElementById('addToMyCardsModal').classList.remove('show');
+  addingCatalogId = null;
 }
 
-function previewCatalogImg(url) {
-  const img = document.getElementById('catalogImgPreview');
-  if (url && url.startsWith('http')) {
-    img.src = url; img.style.display = 'block';
-    img.onerror = () => { img.style.display = 'none'; };
-  } else { img.style.display = 'none'; }
-}
+async function confirmAddToMyCards() {
+  if (!addingCatalogId) return;
 
-async function saveCatalogItem(event) {
-  event.preventDefault();
-  const form = document.getElementById('catalogForm');
-  const data = {
-    name: form.elements['name'].value.trim(),
-    name_en: form.elements['name_en'].value.trim(),
-    set_name: form.elements['set_name'].value.trim(),
-    set_code: form.elements['set_code'].value.trim(),
-    card_number: form.elements['card_number'].value.trim(),
-    rarity: form.elements['rarity'].value,
-    image_url: form.elements['image_url'].value.trim(),
-    description: form.elements['description'].value.trim(),
-  };
+  const btn = document.getElementById('addToMyCardsBtn');
+  btn.disabled = true;
+  btn.textContent = '添加中…';
 
   try {
-    if (editingCatalogId) {
-      const { error } = await supabase.from('card_catalog').update(data).eq('id', editingCatalogId);
-      if (error) throw new Error(error.message);
-    } else {
-      const { error } = await supabase.from('card_catalog').insert(data);
-      if (error) throw new Error(error.message);
-    }
-    closeCatalogModal();
-    showToast(editingCatalogId ? '已更新' : `"${data.name}" 已添加`, 'success');
-    loadCatalog(catalogPage);
-    loadCatalogSets();
-  } catch (e) { showToast(e.message, 'error'); }
+    const qty       = parseInt(document.getElementById('addCardQty').value)   || 1;
+    const cost      = parseFloat(document.getElementById('addCardCost').value) || 0;
+    const condition = document.getElementById('addCardCondition').value;
+    const notes     = document.getElementById('addCardNotes').value.trim();
+
+    await createCardFromCatalog(addingCatalogId, { quantity: qty, cost_price: cost, condition, notes });
+
+    closeAddToMyCardsModal();
+    showToast('✅ 已加入我的卡牌！前往「我的卡牌」页面查看。', 'success');
+  } catch (e) {
+    showToast('添加失败：' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '加入我的卡牌';
+  }
 }
 
-// ── Delete ──
-
-function promptCatalogDelete(id, name) {
-  deleteCatalogId = id;
-  document.getElementById('deleteCatalogName').textContent = name;
-  document.getElementById('catalogDeleteModal').classList.add('show');
-}
-
-function closeCatalogDeleteModal() {
-  document.getElementById('catalogDeleteModal').classList.remove('show');
-  deleteCatalogId = null;
-}
-
-async function confirmCatalogDelete() {
-  if (!deleteCatalogId) return;
-  try {
-    const { error } = await supabase.from('card_catalog').delete().eq('id', deleteCatalogId);
-    if (error) throw new Error(error.message);
-    closeCatalogDeleteModal();
-    showToast('已删除', 'success');
-    loadCatalog(catalogPage);
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-// ── Bulk Import ──
+// ════════════════════════════════════════════
+// Bulk Import
+// ════════════════════════════════════════════
 
 function openBulkModal() {
   bulkItems = [];
@@ -365,7 +346,8 @@ function renderBulkPreview(items) {
       <td style="padding:6px 10px;color:var(--text-muted);">${item.set_name || '--'}</td>
       <td style="padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;">${item.card_number || '--'}</td>
       <td style="padding:6px 10px;">${item.rarity ? `<span class="rarity-badge badge-${item.rarity}" style="font-size:9px;">${item.rarity}</span>` : '--'}</td>
-    </tr>`).join('') + (items.length > 100 ? `<tr><td colspan="4" style="padding:8px 10px;color:var(--text-muted);text-align:center;">还有 ${items.length - 100} 条…</td></tr>` : '');
+    </tr>`).join('') +
+    (items.length > 100 ? `<tr><td colspan="4" style="padding:8px 10px;color:var(--text-muted);text-align:center;">还有 ${items.length - 100} 条…</td></tr>` : '');
   document.getElementById('bulkPreview').style.display = 'block';
   document.getElementById('bulkImportBtn').disabled = false;
 }
@@ -383,7 +365,7 @@ async function executeBulkImport() {
   btn.disabled = true;
   btn.textContent = '导入中…';
   try {
-    const { data, error } = await supabase.from('card_catalog').upsert(bulkItems, {
+    const { error } = await supabase.from('card_catalog').upsert(bulkItems, {
       onConflict: 'name,set_name,card_number',
     });
     if (error) throw new Error(error.message);
