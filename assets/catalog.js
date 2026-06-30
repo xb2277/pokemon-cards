@@ -5,7 +5,7 @@ let catalogTotal = 0;
 let catalogPerPage = 50;
 let catalogDebounce = null;
 let bulkItems = [];
-let catalogViewMode = 'table';   // 'table' | 'grid'
+let catalogViewMode = 'grid';   // 'table' | 'grid'
 let catalogLanguage = 'zh';       // 默认国内卡
 
 // 「加入我的卡牌」弹窗的当前 catalogId

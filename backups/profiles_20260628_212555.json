@@ -1,0 +1,22 @@
+[
+  {
+    "id": "3d49ab5b-8f0d-4a07-9fc4-d29b94710f17",
+    "email": "admin@kapai.local",
+    "username": "admin",
+    "nick_name": "管理员",
+    "avatar": "",
+    "phone": "",
+    "role": "admin",
+    "created_at": "2026-06-27T13:22:10.795222+00:00"
+  },
+  {
+    "id": "b8f03024-0085-447b-99aa-ab76ee5bb947",
+    "email": "jiuli3313@gmail.com",
+    "username": "aimi",
+    "nick_name": "aimi",
+    "avatar": "",
+    "phone": "",
+    "role": "user",
+    "created_at": "2026-06-28T12:16:26.140681+00:00"
+  }
+]

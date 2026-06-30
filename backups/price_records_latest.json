@@ -1,0 +1,650 @@
+[
+  {
+    "id": 111,
+    "card_id": null,
+    "catalog_id": 102,
+    "platform": "集换社",
+    "price": 380,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 112,
+    "card_id": null,
+    "catalog_id": 103,
+    "platform": "集换社",
+    "price": 120,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 113,
+    "card_id": null,
+    "catalog_id": 104,
+    "platform": "集换社",
+    "price": 680,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 114,
+    "card_id": null,
+    "catalog_id": 105,
+    "platform": "集换社",
+    "price": 15,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 115,
+    "card_id": null,
+    "catalog_id": 106,
+    "platform": "集换社",
+    "price": 180,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 116,
+    "card_id": null,
+    "catalog_id": 107,
+    "platform": "集换社",
+    "price": 520,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 117,
+    "card_id": null,
+    "catalog_id": 108,
+    "platform": "集换社",
+    "price": 280,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 118,
+    "card_id": null,
+    "catalog_id": 109,
+    "platform": "集换社",
+    "price": 1200,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 119,
+    "card_id": null,
+    "catalog_id": 110,
+    "platform": "集换社",
+    "price": 800,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 120,
+    "card_id": null,
+    "catalog_id": 111,
+    "platform": "集换社",
+    "price": 150,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 121,
+    "card_id": null,
+    "catalog_id": 112,
+    "platform": "集换社",
+    "price": 850,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 122,
+    "card_id": null,
+    "catalog_id": 113,
+    "platform": "集换社",
+    "price": 600,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 123,
+    "card_id": null,
+    "catalog_id": 114,
+    "platform": "集换社",
+    "price": 25,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 124,
+    "card_id": null,
+    "catalog_id": 115,
+    "platform": "集换社",
+    "price": 320,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 125,
+    "card_id": null,
+    "catalog_id": 116,
+    "platform": "集换社",
+    "price": 450,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 126,
+    "card_id": null,
+    "catalog_id": 117,
+    "platform": "集换社",
+    "price": 480,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 127,
+    "card_id": null,
+    "catalog_id": 118,
+    "platform": "集换社",
+    "price": 420,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 128,
+    "card_id": null,
+    "catalog_id": 119,
+    "platform": "集换社",
+    "price": 390,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 129,
+    "card_id": null,
+    "catalog_id": 120,
+    "platform": "集换社",
+    "price": 410,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 130,
+    "card_id": null,
+    "catalog_id": 121,
+    "platform": "集换社",
+    "price": 200,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 131,
+    "card_id": null,
+    "catalog_id": 122,
+    "platform": "集换社",
+    "price": 680,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 132,
+    "card_id": null,
+    "catalog_id": 123,
+    "platform": "集换社",
+    "price": 580,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 133,
+    "card_id": null,
+    "catalog_id": 124,
+    "platform": "集换社",
+    "price": 450,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 134,
+    "card_id": null,
+    "catalog_id": 125,
+    "platform": "集换社",
+    "price": 380,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 135,
+    "card_id": null,
+    "catalog_id": 126,
+    "platform": "集换社",
+    "price": 360,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 136,
+    "card_id": null,
+    "catalog_id": 127,
+    "platform": "集换社",
+    "price": 45,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 137,
+    "card_id": null,
+    "catalog_id": 128,
+    "platform": "集换社",
+    "price": 55,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 138,
+    "card_id": null,
+    "catalog_id": 129,
+    "platform": "集换社",
+    "price": 35,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 139,
+    "card_id": null,
+    "catalog_id": 130,
+    "platform": "集换社",
+    "price": 280,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 140,
+    "card_id": null,
+    "catalog_id": 131,
+    "platform": "集换社",
+    "price": 520,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 141,
+    "card_id": null,
+    "catalog_id": 132,
+    "platform": "集换社",
+    "price": 380,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 142,
+    "card_id": null,
+    "catalog_id": 133,
+    "platform": "集换社",
+    "price": 320,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 143,
+    "card_id": null,
+    "catalog_id": 134,
+    "platform": "集换社",
+    "price": 350,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 144,
+    "card_id": null,
+    "catalog_id": 135,
+    "platform": "集换社",
+    "price": 420,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 145,
+    "card_id": null,
+    "catalog_id": 136,
+    "platform": "集换社",
+    "price": 85,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 146,
+    "card_id": null,
+    "catalog_id": 137,
+    "platform": "集换社",
+    "price": 180,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 147,
+    "card_id": null,
+    "catalog_id": 138,
+    "platform": "集换社",
+    "price": 65,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 148,
+    "card_id": null,
+    "catalog_id": 139,
+    "platform": "集换社",
+    "price": 45,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 149,
+    "card_id": null,
+    "catalog_id": 140,
+    "platform": "集换社",
+    "price": 220,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 150,
+    "card_id": null,
+    "catalog_id": 141,
+    "platform": "集换社",
+    "price": 580,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 151,
+    "card_id": null,
+    "catalog_id": 142,
+    "platform": "集换社",
+    "price": 130,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 152,
+    "card_id": null,
+    "catalog_id": 143,
+    "platform": "集换社",
+    "price": 140,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 153,
+    "card_id": null,
+    "catalog_id": 144,
+    "platform": "集换社",
+    "price": 110,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 154,
+    "card_id": null,
+    "catalog_id": 145,
+    "platform": "集换社",
+    "price": 150,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 155,
+    "card_id": null,
+    "catalog_id": 146,
+    "platform": "集换社",
+    "price": 190,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 156,
+    "card_id": null,
+    "catalog_id": 147,
+    "platform": "集换社",
+    "price": 160,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 157,
+    "card_id": null,
+    "catalog_id": 148,
+    "platform": "集换社",
+    "price": 420,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 158,
+    "card_id": null,
+    "catalog_id": 149,
+    "platform": "集换社",
+    "price": 350,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 159,
+    "card_id": null,
+    "catalog_id": 150,
+    "platform": "集换社",
+    "price": 380,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 160,
+    "card_id": null,
+    "catalog_id": 151,
+    "platform": "集换社",
+    "price": 280,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 161,
+    "card_id": null,
+    "catalog_id": 152,
+    "platform": "集换社",
+    "price": 250,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 162,
+    "card_id": null,
+    "catalog_id": 153,
+    "platform": "集换社",
+    "price": 520,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 163,
+    "card_id": null,
+    "catalog_id": 154,
+    "platform": "集换社",
+    "price": 350,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 164,
+    "card_id": null,
+    "catalog_id": 155,
+    "platform": "集换社",
+    "price": 65,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 165,
+    "card_id": null,
+    "catalog_id": 156,
+    "platform": "集换社",
+    "price": 980,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 166,
+    "card_id": null,
+    "catalog_id": 157,
+    "platform": "集换社",
+    "price": 650,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 167,
+    "card_id": null,
+    "catalog_id": 158,
+    "platform": "集换社",
+    "price": 450,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 168,
+    "card_id": null,
+    "catalog_id": 159,
+    "platform": "集换社",
+    "price": 720,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 169,
+    "card_id": null,
+    "catalog_id": 160,
+    "platform": "集换社",
+    "price": 580,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:34+00:00"
+  },
+  {
+    "id": 170,
+    "card_id": null,
+    "catalog_id": 1,
+    "platform": "集换社",
+    "price": 280,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 171,
+    "card_id": null,
+    "catalog_id": 2,
+    "platform": "集换社",
+    "price": 520,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 172,
+    "card_id": null,
+    "catalog_id": 3,
+    "platform": "集换社",
+    "price": 680,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 173,
+    "card_id": null,
+    "catalog_id": 4,
+    "platform": "集换社",
+    "price": 1200,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 174,
+    "card_id": null,
+    "catalog_id": 5,
+    "platform": "集换社",
+    "price": 180,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 175,
+    "card_id": null,
+    "catalog_id": 6,
+    "platform": "集换社",
+    "price": 25,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 176,
+    "card_id": null,
+    "catalog_id": 7,
+    "platform": "集换社",
+    "price": 580,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 177,
+    "card_id": null,
+    "catalog_id": 8,
+    "platform": "集换社",
+    "price": 120,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 178,
+    "card_id": null,
+    "catalog_id": 9,
+    "platform": "集换社",
+    "price": 850,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 179,
+    "card_id": null,
+    "catalog_id": 10,
+    "platform": "集换社",
+    "price": 130,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 180,
+    "card_id": null,
+    "catalog_id": 11,
+    "platform": "集换社",
+    "price": 480,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 181,
+    "card_id": null,
+    "catalog_id": 12,
+    "platform": "集换社",
+    "price": 150,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  },
+  {
+    "id": 182,
+    "card_id": null,
+    "catalog_id": 13,
+    "platform": "集换社",
+    "price": 350,
+    "currency": "CNY",
+    "recorded_at": "2026-06-27T19:25:59+00:00"
+  }
+]
